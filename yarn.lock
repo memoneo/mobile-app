@@ -4801,8 +4801,9 @@ mem@^4.0.0:
     mimic-fn "^2.0.0"
     p-is-promise "^2.0.0"
 
-"memoneo-common@file:../memoneo-common":
+"memoneo-common@https://gitlab.com/memoneo/common":
   version "1.0.0"
+  resolved "https://gitlab.com/memoneo/common#f888e8e74044dba37fae2459c3e9caef0dd0b903"
   dependencies:
     axios "^0.19.1"
     dayjs "^1.8.19"

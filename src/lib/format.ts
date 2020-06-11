@@ -1,4 +1,10 @@
-import { User, TopicLogDateType, Topic, Person, TopicType } from "memoneo-common/lib/types"
+import {
+  User,
+  TopicLogDateType,
+  Topic,
+  Person,
+  TopicType,
+} from "memoneo-common/lib/types"
 import { AddEntryDate } from "../types/AddEntry"
 import { dayjs } from "./reexports"
 
@@ -50,10 +56,16 @@ export function formatPersonName(person: Person): string {
 
 export function formatTopicTypeName(topicType: TopicType): string {
   switch (topicType) {
-    case "person-selection": return "Person Selection"
-    case "selection": return "Selection"
-    case "text-simple": return "Text"
-    case "text-5rated": return "Text 5-Scale Rated"
+    case "person-selection":
+      return "Person Selection"
+    case "selection":
+      return "Selection"
+    case "text-simple":
+      return "Text"
+    case "text-5rated":
+      return "Text 5-Scale Rated"
+    case "goal-selection":
+      return "Goal"
   }
 }
 

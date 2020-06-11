@@ -5,8 +5,8 @@ import {
   TopicLogDateType,
   TopicLog,
   TopicLogValue,
-  TopicLogValueContainer,
   Person,
+  Goal,
 } from "memoneo-common/lib/types"
 import MText from "../../components/common/MText"
 import { formatTopicName } from "../../lib/format"
@@ -22,6 +22,7 @@ interface Props {
   topicActions: typeof TopicActions
   value?: TopicLogValue
   persons: Person[]
+  goals: Goal[]
   date: AddEntryDate
   dateType: TopicLogDateType
   hasRecording: boolean
@@ -80,6 +81,7 @@ class AddEntryTopicContainer extends React.Component<Props, State> {
     const {
       topic,
       persons,
+      goals,
       isPlaying,
       dateType,
       hasRecording,
@@ -103,12 +105,14 @@ class AddEntryTopicContainer extends React.Component<Props, State> {
           styles.topicContainer,
           ...topicContainerStyles,
         ])}
-        key={`topic-${topic.id}`}>
+        key={`topic-${topic.id}`}
+      >
         <View style={styles.topicHeader}>
           <MText
             style={styles.topicHeaderText}
             key={`topic-text-${topic.id}`}
-            onPress={this.onHeaderTextPress}>
+            onPress={this.onHeaderTextPress}
+          >
             {formatTopicName(topic, dateType)}
           </MText>
           <View style={styles.topicHeaderIconBar}>
@@ -168,6 +172,7 @@ class AddEntryTopicContainer extends React.Component<Props, State> {
             topicLog={topicLog}
             value={value}
             persons={persons}
+            goals={goals}
             topicActions={topicActions}
             setTopicContainerStyles={this.setTopicContainerStyles}
           />

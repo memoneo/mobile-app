@@ -25,6 +25,7 @@ import EditTopicText from "./EditTopicText"
 import EditTopicPersonSelection from "./EditTopicPersonSelection"
 import EditTopicSelection from "./EditTopicSelection"
 import { TouchableHighlight } from "react-native-gesture-handler"
+import EditTopicGoalSelection from "./EditTopicGoal"
 
 export interface EditTopicProps {
   topic: Topic
@@ -96,7 +97,8 @@ class EditTopic extends React.Component<EditTopicProps, State> {
     return (
       <View
         style={StyleSheet.flatten(containerStyles)}
-        key={`topic-${topic.id}`}>
+        key={`topic-${topic.id}`}
+      >
         <EditTopicInner {...this.props} deleteTopic={this.deleteTopic} />
       </View>
     )
@@ -127,6 +129,8 @@ function EditTopicInner(props: EditTopicInnerProps): JSX.Element {
       return <EditTopicSelection {...props} submit={submit} />
     case "person-selection":
       return <EditTopicPersonSelection {...props} submit={submit} />
+    case "goal-selection":
+      return <EditTopicGoalSelection {...props} submit={submit} />
   }
 }
 

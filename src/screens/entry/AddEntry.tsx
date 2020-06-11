@@ -12,6 +12,7 @@ import {
   TopicLogDateType,
   TopicLog,
   Person,
+  Goal,
 } from "memoneo-common/lib/types"
 import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
@@ -39,12 +40,14 @@ import AddEntryTopicContainer from "./AddEntryTopicContainer"
 import { TopicActions, TopicLogValueMap } from "../../redux/topic"
 import { PersonActions } from "../../redux/person"
 import { Dayjs } from "dayjs"
+import { GoalActions } from "../../redux/goal"
 
 interface OwnProps {}
 
 interface StateProps {
   persons: Person[]
   topics: Topic[]
+  goals: Goal[]
   loading: boolean
   loadingTopic: boolean
   loadingRecording: boolean
@@ -68,6 +71,7 @@ interface DispatchProps {
   recordingActions: typeof RecordingActions
   topicActions: typeof TopicActions
   personActions: typeof PersonActions
+  goalActions: typeof GoalActions
 }
 
 type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
@@ -100,6 +104,7 @@ class AddEntry extends React.PureComponent<Props, State> {
   async componentDidMount() {
     this.props.topicActions.getTopicsRequest()
     this.props.personActions.getPersonsRequest()
+    this.props.goalActions.getGoalsRequest()
 
     const audioPermissions = await Audio.getPermissionsAsync()
     if (!audioPermissions.granted) {
@@ -239,7 +244,7 @@ class AddEntry extends React.PureComponent<Props, State> {
       dayjs(date).format("D-MMMM-YYYY")
     )
     await this.sound.loadAsync({ uri: path + `/${topic.id}.m4a` })
-    this.sound.setOnPlaybackStatusUpdate(status => {
+    this.sound.setOnPlaybackStatusUpdate((status) => {
       if (status.isLoaded) {
         if (status.didJustFinish) {
           this.stopPlayRecording()
@@ -299,6 +304,7 @@ class AddEntry extends React.PureComponent<Props, State> {
   render(): JSX.Element {
     const {
       topics,
+      goals,
       recordingError,
       topicError,
       topicRecordMap,
@@ -327,7 +333,8 @@ class AddEntry extends React.PureComponent<Props, State> {
                 <MPicker
                   selectedValue={dateType}
                   enabled={false}
-                  onValueChange={value => this.setState({ dateType: value })}>
+                  onValueChange={(value) => this.setState({ dateType: value })}
+                >
                   <Picker.Item label="Daily" value="daily" />
                   <Picker.Item label="Weekly" value="weekly" />
                   <Picker.Item label="Monthly" value="monthly" />
@@ -379,7 +386,7 @@ class AddEntry extends React.PureComponent<Props, State> {
             )}
             {hasPermissions && hasTopicLog && (
               <View>
-                {topics.map(topic => {
+                {topics.map((topic) => {
                   const isRecordingTopic =
                     recording.length > 0 && recording === topic.id
                   const isRecordingDifferentTopic =
@@ -400,6 +407,7 @@ class AddEntry extends React.PureComponent<Props, State> {
                       topicLog={topicLog}
                       topicActions={topicActions}
                       persons={persons}
+                      goals={goals}
                       date={date}
                       dateType={dateType}
                       value={innerValue}
@@ -427,11 +435,9 @@ class AddEntry extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loading =
     state.user.loading || state.recording.loading || state.topic.loading
   const loadingRecording = state.recording.loading
@@ -439,8 +445,10 @@ const mapStateToProps: MapStateToProps<
   const loadingTopic = state.topic.loading
   const loadingSaveValue = state.topic.loadingSaveValue
 
-  const topics = state.topic.topics.filter(topic => !topic.deleted)
+  const topics = state.topic.topics.filter((topic) => !topic.deleted)
   const topicError = state.topic.error
+
+  const goals = state.goal.goals
 
   const recordingError = state.recording.error
   const topicRecordMap = state.recording.topicRecordMap
@@ -453,6 +461,7 @@ const mapStateToProps: MapStateToProps<
 
   return {
     topics,
+    goals,
     loading,
     loadingRecording,
     loadingUser,
@@ -468,15 +477,15 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     userActions: bindActionCreators(UserActions, dispatch),
     recordingActions: bindActionCreators(RecordingActions, dispatch),
     topicActions: bindActionCreators(TopicActions, dispatch),
     personActions: bindActionCreators(PersonActions, dispatch),
+    goalActions: bindActionCreators(GoalActions, dispatch),
   }
 }
 

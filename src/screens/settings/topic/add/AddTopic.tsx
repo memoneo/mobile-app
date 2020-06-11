@@ -8,7 +8,6 @@ import {
 } from "memoneo-common/lib/types"
 import { contentDiffColor, borderRadius } from "../../../../lib/colors"
 import { TopicActions } from "../../../../redux/topic"
-import { AddEntryDate } from "../../../../types/AddEntry"
 import AddTopicText from "./AddTopicText"
 import AddTopicSelection from "./AddTopicSelection"
 import AddTopicPersonSelection from "./AddTopicPersonSelection"
@@ -19,6 +18,7 @@ import MText from "../../../../components/common/MText"
 import { MapDispatchToProps, connect, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
 import { RootState } from "../../../../redux"
+import AddTopicGoalSelection from "./AddTopicGoalSelection"
 
 interface OwnProps {}
 
@@ -73,18 +73,20 @@ class AddTopic extends React.Component<AddTopicProps, State> {
     return (
       <View style={addTopicStyles.main}>
         <MText h4 bold>
-          Add Topic 
+          Add Topic
         </MText>
         <View style={StyleSheet.flatten(containerStyles)}>
           <MPicker
             selectedValue={this.state.topicType}
             onValueChange={(value: TopicType) =>
               this.setState({ topicType: value })
-            }>
+            }
+          >
             <Picker.Item label="Text Simple" value="text-simple" />
             <Picker.Item label="Text Rated" value="text-5rated" />
             <Picker.Item label="Selection" value="selection" />
             <Picker.Item label="Person Selection" value="person-selection" />
+            <Picker.Item label="Goal Selection" value="goal-selection" />
           </MPicker>
           <AddTopicInner
             {...this.props}
@@ -135,14 +137,20 @@ function AddTopicInner(props: AddTopicInnerProps): JSX.Element {
           typeName="person-selection"
         />
       )
+    case "goal-selection":
+      return (
+        <AddTopicGoalSelection
+          {...props}
+          submit={submit}
+          typeName="goal-selection"
+        />
+      )
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loading = state.user.loading || state.topic.loading
   const loadingTopic = state.topic.loading
   const errorTopic = state.topic.error
@@ -160,10 +168,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     topicActions: bindActionCreators(TopicActions, dispatch),
     selectionTypeActions: bindActionCreators(SelectionTypeActions, dispatch),

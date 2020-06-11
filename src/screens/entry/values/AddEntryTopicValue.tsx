@@ -9,6 +9,8 @@ import {
   TopicLogValueContainer,
   Person,
   TopicLogValuePersonSelection,
+  Goal,
+  TopicLogValueGoalSelection,
 } from "memoneo-common/lib/types"
 import AddEntryTopicValueTextRated from "./AddEntryTopicValueTextRated"
 import AddEntryTopicValueTextSimple from "./AddEntryTopicValueTextSimple"
@@ -16,11 +18,13 @@ import AddEntryTopicValueSelection from "./AddEntryTopicValueSelection"
 import AddEntryTopicValuePersonSelection from "./AddEntryTopicValuePersonSelection"
 import { TopicActions } from "../../../redux/topic"
 import { StyleProp, ViewStyle } from "react-native"
+import AddEntryTopicValueGoalSelection from "./AddEntryTopicValueGoalSelection"
 
 interface Props {
   topic: Topic
   topicLog: TopicLog
   persons: Person[]
+  goals: Goal[]
   value?: TopicLogValue
   topicActions: typeof TopicActions
   setTopicContainerStyles: (styles: StyleProp<ViewStyle>[]) => void
@@ -33,10 +37,11 @@ export interface AddEntryTopicValueInnerProps {
   saveValue: (value: TopicLogValue) => void
 }
 
-const AddEntryTopicValue: React.FC<Props> = props => {
+const AddEntryTopicValue: React.FC<Props> = (props) => {
   const {
     topic,
     topicLog,
+    goals,
     persons,
     value,
     topicActions,
@@ -89,6 +94,16 @@ const AddEntryTopicValue: React.FC<Props> = props => {
           topicLog={topicLog}
           value={value as TopicLogValuePersonSelection}
           persons={persons}
+          saveValue={saveValue}
+        />
+      )
+    case "goal-selection":
+      return (
+        <AddEntryTopicValueGoalSelection
+          topic={topic}
+          topicLog={topicLog}
+          value={value as TopicLogValueGoalSelection}
+          goals={goals}
           saveValue={saveValue}
         />
       )
