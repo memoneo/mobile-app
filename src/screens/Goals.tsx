@@ -1,21 +1,14 @@
 import * as React from "react"
-import { View, Text, StyleProp, ViewStyle, StyleSheet } from "react-native"
+import { View, StyleSheet } from "react-native"
 import Auth from "../components/Auth"
-import { Icon, Badge } from "react-native-elements"
-import { focusedColor } from "../lib/colors"
 import { NavigationInjectedProps, withNavigation } from "react-navigation"
-import { UserActions } from "../redux/user"
-import { User, TopicLogWithDatesAsDayJs, Goal } from "memoneo-common/lib/types"
+import { User, Goal } from "memoneo-common/lib/types"
 import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
-import Header from "../components/Header"
-import { TopicActions } from "../redux/topic"
-import { formatDateType } from "../lib/format"
 import MBadge from "../components/common/MBadge"
-import NotificationHandler from "../components/NotificationHandler"
-import { GoalActions, goalReducer } from "../redux/goal"
+import { GoalActions } from "../redux/goal"
 
 interface OwnProps {}
 
@@ -56,13 +49,13 @@ class Goals extends React.PureComponent<Props, State> {
             </MText>
           </View>
           <View style={{}}>
-            {goals.map(goal => (
+            {goals.map((goal) => (
               <View key={`goal-${goal.inner.id}-view`} style={{}}>
                 <View>
                   <MText bold>{goal.inner.name}</MText>
                 </View>
                 <View style={styles.children}>
-                  {goal.children.map(child => (
+                  {goal.children.map((child) => (
                     <MBadge key={`goal-${child.id}`} value={child.name} />
                   ))}
                 </View>
@@ -75,16 +68,14 @@ class Goals extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loading = state.user.loading
   const error = state.user.error
 
   const parentGoalMap: { [key: string]: GoalContainer } = {}
-  state.goal.goals.forEach(goal => {
+  state.goal.goals.forEach((goal) => {
     if (!goal.parent) parentGoalMap[goal.id] = { inner: goal, children: [] }
     else parentGoalMap[(goal.parent as Goal).id].children.push(goal)
   })
@@ -96,10 +87,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     goalActions: bindActionCreators(GoalActions, dispatch),
   }

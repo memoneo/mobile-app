@@ -13,6 +13,7 @@ import { Icon } from "react-native-elements"
 import { focusedColor, unfocusedColor } from "../lib/colors"
 import AddEntry from "../screens/entry/AddEntry"
 import Settings from "../screens/settings/Settings"
+import EnterEncryptionKey from "../screens/key/EnterEncryptionKey"
 import MText from "./common/MText"
 import { StyleSheet } from "react-native"
 import SettingsSelectionType from "../screens/settings/SettingsSelectionType"
@@ -23,6 +24,7 @@ import AddTopic from "../screens/settings/topic/add/AddTopic"
 import EditGoals from "../screens/settings/goal/EditGoals"
 import AddGoal from "../screens/settings/goal/add/AddGoal"
 import Goals from "../screens/Goals"
+import ErrorPage from "../screens/ErrorPage"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -190,6 +192,12 @@ const rootSwitchNavigator = createSwitchNavigator(
       screen: NoAuthStack,
     },
     Tab: tabNavigator,
+    Error: {
+      screen: ErrorPage,
+    },
+    NotEncrypted: {
+      screen: EnterEncryptionKey,
+    },
   },
   {
     initialRouteName: "Tab",

@@ -43,14 +43,16 @@ const MText: React.FC<Props> = ({
     <View>
       <Text
         {...rest}
-        style={StyleSheet.flatten([localStyle.text, dynamicStyle, style])}>
+        style={StyleSheet.flatten([localStyle.text, dynamicStyle, style])}
+      >
         {children}
       </Text>
     </View>
   ) : (
     <Text
       {...rest}
-      style={StyleSheet.flatten([localStyle.text, dynamicStyle, style])}>
+      style={StyleSheet.flatten([localStyle.text, dynamicStyle, style])}
+    >
       {children}
     </Text>
   )

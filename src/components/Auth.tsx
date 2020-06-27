@@ -4,6 +4,7 @@ import { connect, MapStateToProps, MapDispatchToProps } from "react-redux"
 import { AuthActions } from "../redux/auth"
 import { RootState } from "../redux"
 import { withNavigation, NavigationInjectedProps } from "react-navigation"
+import EncryptionContainer from "./EncryptionContainer"
 
 interface OwnProps {}
 
@@ -35,15 +36,15 @@ class Auth extends React.Component<Props, {}> {
 
   render(): JSX.Element {
     const { children, authenticated } = this.props
-    return authenticated ? <React.Fragment>{children}</React.Fragment> : null
+    return authenticated ? (
+      <EncryptionContainer>{children}</EncryptionContainer>
+    ) : null
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const authenticated = state.auth.authenticated
   const loading = state.auth.loading
 
@@ -53,10 +54,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     authActions: bindActionCreators(AuthActions, dispatch),
   }

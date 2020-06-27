@@ -54,6 +54,12 @@ import {
   watchHandleUpdateGoal,
   watchHandleChangePriorityGoal,
 } from "./goal"
+import {
+  EncryptionState,
+  encryptionReducer,
+  handleInitKey,
+  handleRetrieveKey,
+} from "./encryption"
 
 export interface RootState {
   topic: TopicState
@@ -63,6 +69,7 @@ export interface RootState {
   selectionType: SelectionTypeState
   person: PersonState
   goal: GoalState
+  key: EncryptionState
 }
 
 export const rootReducer = combineReducers<RootState>({
@@ -73,6 +80,7 @@ export const rootReducer = combineReducers<RootState>({
   selectionType: selectionTypeReducer,
   person: personReducer,
   goal: goalReducer,
+  key: encryptionReducer,
 })
 
 export function* rootSaga() {
@@ -111,4 +119,7 @@ export function* rootSaga() {
   yield fork(watchHandleDeleteGoal)
   yield fork(watchHandleUpdateGoal)
   yield fork(watchHandleChangePriorityGoal)
+
+  yield fork(handleInitKey)
+  yield fork(handleRetrieveKey)
 }
