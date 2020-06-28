@@ -10,6 +10,7 @@ interface OwnProps {}
 interface StateProps {
   textEncryptionKey: string
   error: string
+  initialLoadDone: boolean
 }
 
 interface DispatchProps {
@@ -22,14 +23,14 @@ class EncryptionContainer extends React.Component<Props, {}> {
   componentDidMount() {
     const { encryptionActions, textEncryptionKey } = this.props
     if (!textEncryptionKey) {
-      this.props.encryptionActions.retrieveKeyRequest()
+      encryptionActions.retrieveKeyRequest()
     }
   }
 
   componentDidUpdate() {
-    const { error } = this.props
+    const { error, initialLoadDone } = this.props
     if (error) this.props.navigation.navigate("Error")
-    if (!this.isEncrypted()) this.props.navigation.navigate("NotEncrypted")
+    if (initialLoadDone && !this.isEncrypted()) this.props.navigation.navigate("NotEncrypted")
   }
 
   isEncrypted = () => !this.props.error && !!this.props.textEncryptionKey
@@ -48,10 +49,12 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
 ) => {
   const textEncryptionKey = state.key.textEncryptionKey
   const error = state.key.error
+  const initialLoadDone = state.key.initialLoadDone
 
   return {
     textEncryptionKey,
     error,
+    initialLoadDone,
   }
 }
 

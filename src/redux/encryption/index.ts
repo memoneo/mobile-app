@@ -6,6 +6,7 @@ import { getTextEncryptionKey, setTextEncryptionKey } from "../../lib/redux"
 export interface EncryptionState {
   textEncryptionKey: string
   error: string
+  initialLoadDone: boolean
 }
 
 export const actionNames = {
@@ -36,6 +37,7 @@ export default actions
 const initialState: EncryptionState = {
   textEncryptionKey: "",
   error: "",
+  initialLoadDone: false,
 }
 
 export const encryptionReducer = handleActions<
@@ -46,11 +48,13 @@ export const encryptionReducer = handleActions<
     [actionNames.RETRIEVE_KEY_REQUEST]: () => {
       return {
         error: "",
+        initialLoadDone: false,
       }
     },
     [actionNames.RETRIEVE_KEY_RESPONSE]: (_, action) => {
       return {
         error: action.payload.error,
+        initialLoadDone: true,
         textEncryptionKey: action.payload.textEncryptionKey,
       }
     },

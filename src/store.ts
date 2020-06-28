@@ -19,7 +19,7 @@ if (IS_PRODUCTION) {
 
 const mw: Middleware[] = [sagaMiddleware]
 if (!IS_PRODUCTION) {
-  mw.push(createLogger({}))
+  //mw.push(createLogger({}))
 }
 
 const store = createStore(

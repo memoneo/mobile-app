@@ -9,6 +9,8 @@ import {
   TopicLogValueContainer,
   TopicLogWithDatesAsString,
   TopicLogWithDatesAsDayJs,
+  TopicLogValueTextSimple,
+  TopicLogValueTextFiveRated,
 } from "memoneo-common/lib/types/Topic"
 import { API_URL } from "../../../config"
 import axios, { AxiosResponse, AxiosError } from "axios"
@@ -17,10 +19,13 @@ import {
   authorizedHeader,
   getErrorMessage,
 } from "memoneo-common/lib/utils/axios"
-import { getHash } from "../../lib/redux"
+import { getHash, getTextEncryptionKey } from "../../lib/redux"
 import { AddEntryDate } from "../../types/AddEntry"
 import { formatAddEntryDate } from "../../lib/format"
 import { dayjs } from "../../lib/reexports"
+import { decryptTopicLogValues } from "./lib"
+import { isTextTopic } from "../../lib/topic"
+import { encryptText } from "../../lib/encryption"
 
 export interface TopicState {
   loading: boolean
@@ -146,7 +151,7 @@ export const topicReducer = handleActions<TopicState, any>(
         action.payload.topicLogs || []
 
       let topicLogs: TopicLogWithDatesAsDayJs[] = tmpTopicLogs
-        .map(topicLog => {
+        .map((topicLog) => {
           return {
             id: topicLog.id,
             dateType: topicLog.dateType,
@@ -208,6 +213,7 @@ export const topicReducer = handleActions<TopicState, any>(
       const newValue: TopicLogValue | undefined = action.payload.newValue
       const topicLog: TopicLog | undefined = action.payload.topicLog
       const topic: Topic | undefined = action.payload.topic
+      const encrypted: boolean | undefined = action.payload.encrypted
 
       if (newValue && topicLog && topic) {
         newTopicLogValueMap[topic.id] = {
@@ -215,6 +221,7 @@ export const topicReducer = handleActions<TopicState, any>(
           topicLogId: topicLog.id,
           value: newValue,
           type: topic.typeInfo.type,
+          encrypted,
         }
       }
 
@@ -238,7 +245,7 @@ export const topicReducer = handleActions<TopicState, any>(
       const topicLogValues: TopicLogValueContainer<TopicLogValue>[] =
         action.payload.topicLogValues || []
       topicLogValues.forEach(
-        topicLogValue =>
+        (topicLogValue) =>
           (newTopicLogValueMap[topicLogValue.topicId] = topicLogValue)
       )
 
@@ -329,7 +336,7 @@ export const topicReducer = handleActions<TopicState, any>(
 
       if (!error) {
         const idx = newTopics.findIndex(
-          currentTopic => currentTopic.id === topic.id
+          (currentTopic) => currentTopic.id === topic.id
         )
         if (idx !== -1) {
           newTopics[idx] = topic
@@ -478,10 +485,49 @@ function* handleCreateOrUpdateTopicLogValue(action) {
     topicId: topic.id,
     topicLogId: topicLog.id,
     type,
-    value,
+    value: { ...value },
+    encrypted: false,
   }
 
   const hash: string = yield call(getHash)
+
+  // TODO to another function
+  if (isTextTopic(type)) {
+    console.log("ENCRYPTING")
+    const textEncryptionKeyRes: Result<string, Error> = yield call(
+      getTextEncryptionKey
+    )
+
+    if (textEncryptionKeyRes.err) {
+      yield put(
+        actions.createOrUpdateTopicLogValueResponse({
+          error: textEncryptionKeyRes.err.message,
+        })
+      )
+      return
+    }
+
+    const key = textEncryptionKeyRes.ok
+
+    const textValue = body.value as
+      | TopicLogValueTextFiveRated
+      | TopicLogValueTextSimple
+    const encryptionRes: Result<string, Error> = yield call(
+      lazyProtect(encryptText(textValue.text, key))
+    )
+    if (encryptionRes.err) {
+      console.error("Encryption error occurred " + encryptionRes.err.message)
+      yield put(
+        actions.createOrUpdateTopicLogValueResponse({
+          error: encryptionRes.err.message,
+        })
+      )
+      return
+    }
+
+    textValue.text = encryptionRes.ok!
+    body.encrypted = true
+  }
 
   const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
     lazyProtect(
@@ -507,6 +553,7 @@ function* handleCreateOrUpdateTopicLogValue(action) {
       newValue: value,
       topic,
       topicLog,
+      encrypted: body.encrypted,
     })
   )
 }
@@ -540,6 +587,23 @@ function* handleGetTopicLogValues(action) {
 
   const res = getOrCreateResult.ok!
   const topicLogValues: TopicLogValueContainer<TopicLogValue>[] = res.data.data
+
+  const textEncryptionKeyRes: Result<string, Error> = yield call(
+    getTextEncryptionKey
+  )
+
+  if (textEncryptionKeyRes.err) {
+    yield put(
+      actions.createOrUpdateTopicLogValueResponse({
+        error: textEncryptionKeyRes.err.message,
+      })
+    )
+    return
+  }
+
+  const key = textEncryptionKeyRes.ok
+
+  yield decryptTopicLogValues(topicLogValues, key)
 
   yield put(
     actions.getTopicLogValuesResponse({

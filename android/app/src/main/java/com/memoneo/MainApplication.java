@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import nl.bravobit.ffmpeg.FFmpeg;
+import com.tectiv3.aes.RCTAesPackage;
 
 /**
  * Remains in Java due to better compatibility with React Native.
@@ -46,9 +47,10 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
             return Arrays.asList(
                     new MainReactPackage(),
-            new ReactNativePushNotificationPackage(),
-            new AsyncStoragePackage(),
+                    new ReactNativePushNotificationPackage(),
+                    new AsyncStoragePackage(),
                     new RNFSPackage(),
+                    new RCTAesPackage(),
                     // START doesn't support autolinking
                     new SvgPackage(),
                     new RNGestureHandlerPackage(),

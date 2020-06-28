@@ -47,7 +47,7 @@ class EnterEncryptionKey extends React.PureComponent<Props, State> {
     const { textEncryptionKey, navigation, error, authenticated } = this.props
 
     if (!!textEncryptionKey) {
-      navigation.navigate("Home")
+      navigation.navigate("Tab")
     } else if (error) {
       navigation.navigate("Error")
     } else if (!authenticated) {
