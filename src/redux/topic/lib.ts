@@ -27,9 +27,10 @@ export async function decryptTopicLogValues(
             | TopicLogValueTextSimple
             | TopicLogValueTextFiveRated
           const cipherText = value.text
-
-          const decryptedText = await decryptText(cipherText, key)
-          value.text = decryptedText
+          if (cipherText) {
+            const decryptedText = await decryptText(cipherText, key)
+            value.text = decryptedText
+          }
         default:
           continue
       }

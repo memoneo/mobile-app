@@ -26,6 +26,7 @@ import { dayjs } from "../../lib/reexports"
 import { decryptTopicLogValues } from "./lib"
 import { isTextTopic } from "../../lib/topic"
 import { encryptText } from "../../lib/encryption"
+import { textStandardColor } from "../../lib/colors"
 
 export interface TopicState {
   loading: boolean
@@ -493,69 +494,70 @@ function* handleCreateOrUpdateTopicLogValue(action) {
 
   // TODO to another function
   if (isTextTopic(type)) {
-    console.log("ENCRYPTING")
-    const textEncryptionKeyRes: Result<string, Error> = yield call(
-      getTextEncryptionKey
-    )
-
-    if (textEncryptionKeyRes.err) {
-      yield put(
-        actions.createOrUpdateTopicLogValueResponse({
-          error: textEncryptionKeyRes.err.message,
-        })
-      )
-      return
-    }
-
-    const key = textEncryptionKeyRes.ok
-
     const textValue = body.value as
       | TopicLogValueTextFiveRated
       | TopicLogValueTextSimple
-    const encryptionRes: Result<string, Error> = yield call(
-      lazyProtect(encryptText(textValue.text, key))
+    if (textValue.text && textValue.text.length > 0) {
+      const textEncryptionKeyRes: Result<string, Error> = yield call(
+        getTextEncryptionKey
+      )
+
+      if (textEncryptionKeyRes.err) {
+        yield put(
+          actions.createOrUpdateTopicLogValueResponse({
+            error: textEncryptionKeyRes.err.message,
+          })
+        )
+        return
+      }
+
+      const key = textEncryptionKeyRes.ok
+
+      const encryptionRes: Result<string, Error> = yield call(
+        lazyProtect(encryptText(textValue.text, key))
+      )
+      if (encryptionRes.err) {
+        console.error("Encryption error occurred " + encryptionRes.err.message)
+        yield put(
+          actions.createOrUpdateTopicLogValueResponse({
+            error: encryptionRes.err.message,
+          })
+        )
+        return
+      }
+
+      textValue.text = encryptionRes.ok!
+      body.encrypted = true
+    }
+
+    const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+      lazyProtect(
+        axios.post(`${API_URL}/topiclogvalue/createorupdate`, body, {
+          withCredentials: true,
+          headers: { ...defaultHeaders, ...authorizedHeader(hash) },
+        })
+      )
     )
-    if (encryptionRes.err) {
-      console.error("Encryption error occurred " + encryptionRes.err.message)
+
+    if (getOrCreateResult.err) {
       yield put(
         actions.createOrUpdateTopicLogValueResponse({
-          error: encryptionRes.err.message,
+          error: getErrorMessage(getOrCreateResult.err),
         })
       )
       return
     }
 
-    textValue.text = encryptionRes.ok!
-    body.encrypted = true
-  }
-
-  const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
-    lazyProtect(
-      axios.post(`${API_URL}/topiclogvalue/createorupdate`, body, {
-        withCredentials: true,
-        headers: { ...defaultHeaders, ...authorizedHeader(hash) },
-      })
-    )
-  )
-
-  if (getOrCreateResult.err) {
     yield put(
       actions.createOrUpdateTopicLogValueResponse({
-        error: getErrorMessage(getOrCreateResult.err),
+        error: "",
+        newValue: value,
+        topic,
+        topicLog,
+        encrypted: body.encrypted,
       })
     )
-    return
   }
-
-  yield put(
-    actions.createOrUpdateTopicLogValueResponse({
-      error: "",
-      newValue: value,
-      topic,
-      topicLog,
-      encrypted: body.encrypted,
-    })
-  )
 }
 
 export function* watchHandleGetTopicLogValues() {
