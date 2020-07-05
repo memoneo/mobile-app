@@ -529,35 +529,35 @@ function* handleCreateOrUpdateTopicLogValue(action) {
       textValue.text = encryptionRes.ok!
       body.encrypted = true
     }
+  }
 
-    const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
-      lazyProtect(
-        axios.post(`${API_URL}/topiclogvalue/createorupdate`, body, {
-          withCredentials: true,
-          headers: { ...defaultHeaders, ...authorizedHeader(hash) },
-        })
-      )
-    )
-
-    if (getOrCreateResult.err) {
-      yield put(
-        actions.createOrUpdateTopicLogValueResponse({
-          error: getErrorMessage(getOrCreateResult.err),
-        })
-      )
-      return
-    }
-
-    yield put(
-      actions.createOrUpdateTopicLogValueResponse({
-        error: "",
-        newValue: value,
-        topic,
-        topicLog,
-        encrypted: body.encrypted,
+  const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+    lazyProtect(
+      axios.post(`${API_URL}/topiclogvalue/createorupdate`, body, {
+        withCredentials: true,
+        headers: { ...defaultHeaders, ...authorizedHeader(hash) },
       })
     )
+  )
+
+  if (getOrCreateResult.err) {
+    yield put(
+      actions.createOrUpdateTopicLogValueResponse({
+        error: getErrorMessage(getOrCreateResult.err),
+      })
+    )
+    return
   }
+
+  yield put(
+    actions.createOrUpdateTopicLogValueResponse({
+      error: "",
+      newValue: value,
+      topic,
+      topicLog,
+      encrypted: body.encrypted,
+    })
+  )
 }
 
 export function* watchHandleGetTopicLogValues() {
