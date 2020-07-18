@@ -5,9 +5,9 @@ import { NavigationInjectedProps, withNavigation } from "react-navigation"
 import { User, Goal } from "memoneo-common/lib/types"
 import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
+import LinearGradient from "react-native-linear-gradient"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
-import MBadge from "../components/common/MBadge"
 import { GoalActions } from "../redux/goal"
 
 interface OwnProps {}
@@ -56,7 +56,14 @@ class Goals extends React.PureComponent<Props, State> {
                 </View>
                 <View style={styles.children}>
                   {goal.children.map((child) => (
-                    <MBadge key={`goal-${child.id}`} value={child.name} />
+                    <LinearGradient
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      colors={["green", "red"]}
+                      key={`goal-${child.id}`}
+                    >
+                      <MText>{child.name}</MText>
+                    </LinearGradient>
                   ))}
                 </View>
               </View>

@@ -1,40 +1,37 @@
 package com.memoneo;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.Uri;
 
+import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
-import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
-import com.rnfs.RNFSPackage;
-import com.horcrux.svg.SvgPackage;
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.memoneo.generated.BasePackageList;
-import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
-import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
-import com.swmansion.reanimated.ReanimatedPackage;
 
+import org.unimodules.adapters.react.ReactAdapterPackage;
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
+import org.unimodules.core.interfaces.Package;
 import org.unimodules.core.interfaces.SingletonModule;
 
-import com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage;
+import expo.modules.constants.ConstantsPackage;
+import expo.modules.permissions.PermissionsPackage;
+import expo.modules.filesystem.FileSystemPackage;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
-import nl.bravobit.ffmpeg.FFmpeg;
-import com.tectiv3.aes.RCTAesPackage;
+import javax.annotation.Nullable;
 
-/**
- * Remains in Java due to better compatibility with React Native.
- */
 public class MainApplication extends Application implements ReactApplication {
     private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
-            new BasePackageList().getPackageList(),
-            Arrays.asList()
+            new BasePackageList().getPackageList()
     );
 
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -45,27 +42,26 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected List<ReactPackage> getPackages() {
-            return Arrays.asList(
-                    new MainReactPackage(),
-                    new ReactNativePushNotificationPackage(),
-                    new AsyncStoragePackage(),
-                    new RNFSPackage(),
-                    new RCTAesPackage(),
-                    // START doesn't support autolinking
-                    new SvgPackage(),
-                    new RNGestureHandlerPackage(),
-                    new SafeAreaContextPackage(),
-                    new ReanimatedPackage(),
-                    new RNDateTimePickerPackage(),
-                    // END doesn't support autolinking
-                    new M4aConversionPackage(),
-                    new ModuleRegistryAdapter(mModuleRegistryProvider)
-            );
+            List<ReactPackage> packages = new PackageList(this).getPackages();
+            packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+            return packages;
         }
 
         @Override
         protected String getJSMainModuleName() {
             return "index";
+        }
+
+        @Override
+        protected @Nullable
+        String getJSBundleFile() {
+            return super.getJSBundleFile();
+        }
+
+        @Override
+        protected @Nullable
+        String getBundleAssetName() {
+            return super.getBundleAssetName();
         }
     };
 
@@ -79,10 +75,37 @@ public class MainApplication extends Application implements ReactApplication {
         super.onCreate();
         SoLoader.init(this, /* native exopackage */ false);
 
-        if (FFmpeg.getInstance(this).isSupported()) {
-            // ffmpeg is supported
-        } else {
-            // ffmpeg is not supported
+        initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    }
+
+    /**
+     * Loads Flipper in React Native templates. Call this in the onCreate method with something like
+     * initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+     *
+     * @param context
+     * @param reactInstanceManager
+     */
+    private static void initializeFlipper(
+            Context context, ReactInstanceManager reactInstanceManager) {
+        if (BuildConfig.DEBUG) {
+            try {
+        /*
+         We use reflection here to pick up the class that initializes Flipper,
+        since Flipper library is not available in release mode
+        */
+                Class<?> aClass = Class.forName("com.rndiffapp.ReactNativeFlipper");
+                aClass
+                        .getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
+                        .invoke(null, context, reactInstanceManager);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

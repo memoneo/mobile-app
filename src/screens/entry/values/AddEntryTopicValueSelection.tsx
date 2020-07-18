@@ -23,9 +23,9 @@ class AddEntryTopicValueSelection extends React.Component<Props, State> {
 
     const savedSelectedItems = []
     if (this.props.value) {
-      this.props.value.selection.forEach(selectionItemId => {
+      this.props.value.selection.forEach((selectionItemId) => {
         const existingIdx = selectableItems.findIndex(
-          selectableItem => selectableItem.id === selectionItemId
+          (selectableItem) => selectableItem.id === selectionItemId
         )
         if (existingIdx !== -1) {
           savedSelectedItems.push(selectableItems[existingIdx])
@@ -39,7 +39,7 @@ class AddEntryTopicValueSelection extends React.Component<Props, State> {
   componentDidMount() {
     if (!this.props.topic.typeInfo.data) {
       console.error("props.topic.typeInfo.data should not be falsy")
-      return null
+      return
     }
 
     this.updateSelectedItemsFromValue()
@@ -64,9 +64,9 @@ class AddEntryTopicValueSelection extends React.Component<Props, State> {
 
     return (
       <View style={styles.selectableContainer}>
-        {selectableItems.map(item => {
+        {selectableItems.map((item) => {
           const currentIndex = selectedItems.findIndex(
-            selectedItem => item.id === selectedItem.id
+            (selectedItem) => item.id === selectedItem.id
           )
 
           const buttonType = currentIndex === -1 ? "outline" : "solid"
@@ -81,7 +81,7 @@ class AddEntryTopicValueSelection extends React.Component<Props, State> {
 
             this.setState({ selectedItems: newSelectedItems })
             this.props.saveValue({
-              selection: newSelectedItems.map(item => item.id),
+              selection: newSelectedItems.map((item) => item.id),
             })
           }
 

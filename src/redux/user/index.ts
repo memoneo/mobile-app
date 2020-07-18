@@ -9,7 +9,7 @@ import {
   getErrorMessage,
 } from "memoneo-common/lib/utils/axios"
 import { getHash } from "../../lib/redux"
-import { User } from "../../../../memoneo-common/lib/types"
+import { User } from "memoneo-common/lib/types"
 import { Topic } from "memoneo-common/lib/types"
 
 export interface UserState {

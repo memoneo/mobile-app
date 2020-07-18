@@ -1,15 +1,13 @@
 import React from "react"
+import { StyleSheet, ViewStyle, StyleProp, TextStyle } from "react-native"
+import { Picker } from "@react-native-community/picker"
 import {
-  StyleSheet,
-  Picker,
   PickerProps,
-  ViewStyle,
-  StyleProp,
   PickerItemProps,
-} from "react-native"
+} from "@react-native-community/picker/typings/Picker"
 
 interface OwnMPickerProps {
-  style?: ViewStyle
+  style?: TextStyle
 }
 
 type MPickerProps = OwnMPickerProps & PickerProps
@@ -18,7 +16,8 @@ const MPicker: React.FC<MPickerProps> = ({ style, children, ...props }) => (
   <Picker
     style={StyleSheet.flatten([style, pickerStyles.picker])}
     itemStyle={StyleSheet.flatten([pickerStyles.item])}
-    {...props}>
+    {...props}
+  >
     {children}
   </Picker>
 )
