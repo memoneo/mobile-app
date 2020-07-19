@@ -18,6 +18,10 @@ export const RATING_3_COLOR = "gold"
 export const RATING_4_COLOR = "orange"
 export const RATING_5_COLOR = "#ff7c5e"
 
+export const colors = {
+    primaryColor
+}
+
 export function getColorForRating(rating: number, ratedType: RatedType): string {
     if (rating === -1) {
         return ""

@@ -9,6 +9,8 @@ import LinearGradient from "react-native-linear-gradient"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
 import { GoalActions } from "../redux/goal"
+import { colors, borderRadius } from "../lib/colors"
+import { ScrollView } from "react-native-gesture-handler"
 
 interface OwnProps {}
 
@@ -37,6 +39,10 @@ class Goals extends React.PureComponent<Props, State> {
     this.props.goalActions.getGoalsRequest()
   }
 
+  getLowerProgressBound = (progress: number): number => Math.max(5, progress)
+  getUpperProgressBound = (progress: number): number =>
+    Math.min(95, 100 - progress)
+
   render(): JSX.Element {
     const { goals } = this.props
 
@@ -48,27 +54,54 @@ class Goals extends React.PureComponent<Props, State> {
               Goals
             </MText>
           </View>
-          <View style={{}}>
+          <ScrollView style={{}}>
             {goals.map((goal) => (
               <View key={`goal-${goal.inner.id}-view`} style={{}}>
-                <View>
+                <View style={styles.goalTitle}>
                   <MText bold>{goal.inner.name}</MText>
                 </View>
                 <View style={styles.children}>
                   {goal.children.map((child) => (
-                    <LinearGradient
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      colors={["green", "red"]}
-                      key={`goal-${child.id}`}
+                    <View
+                      key={`goal-badge-container-${child.id}`}
+                      style={styles.subgoalContainer}
                     >
-                      <MText>{child.name}</MText>
-                    </LinearGradient>
+                      <View
+                        style={styles.subgoalBadge}
+                        key={`goal-badge-${child.id}`}
+                      >
+                        <MText style={styles.subgoalText}>{child.name}</MText>
+                      </View>
+                      <View style={styles.gradientContainer}>
+                        <View
+                          style={StyleSheet.flatten([
+                            styles.gradient1,
+                            {
+                              width: `${this.getLowerProgressBound(
+                                child.progress
+                              )}%`,
+                            },
+                          ])}
+                          key={`goal-gradient1-${child.id}`}
+                        />
+                        <View
+                          style={StyleSheet.flatten([
+                            styles.gradient2,
+                            {
+                              width: `${this.getUpperProgressBound(
+                                child.progress
+                              )}%`,
+                            },
+                          ])}
+                          key={`goal-gradient2-${child.id}`}
+                        />
+                      </View>
+                    </View>
                   ))}
                 </View>
               </View>
             ))}
-          </View>
+          </ScrollView>
         </View>
       </Auth>
     )
@@ -115,9 +148,42 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {},
+  goalTitle: {
+    marginBottom: 4,
+  },
   children: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  subgoalBadge: {
+    backgroundColor: colors.primaryColor,
+    borderTopLeftRadius: borderRadius,
+    borderTopRightRadius: borderRadius,
+    padding: 4,
+  },
+  subgoalText: {
+    color: "#fff",
+    fontSize: 11,
+  },
+  gradientContainer: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  gradient1: {
+    height: 4,
+    borderBottomLeftRadius: borderRadius,
+    marginTop: -2,
+    backgroundColor: "green",
+  },
+  gradient2: {
+    height: 4,
+    borderBottomRightRadius: borderRadius,
+    marginTop: -2,
+    backgroundColor: "silver",
+  },
+  subgoalContainer: {
+    margin: 2,
+    maxWidth: 100,
   },
 })
