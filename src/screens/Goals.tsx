@@ -1,5 +1,5 @@
 import * as React from "react"
-import { View, StyleSheet } from "react-native"
+import { View, StyleSheet, Modal } from "react-native"
 import Auth from "../components/Auth"
 import { NavigationInjectedProps, withNavigation } from "react-navigation"
 import { User, Goal } from "memoneo-common/lib/types"
@@ -10,7 +10,8 @@ import { RootState } from "../redux"
 import MText from "../components/common/MText"
 import { GoalActions } from "../redux/goal"
 import { colors, borderRadius } from "../lib/colors"
-import { ScrollView } from "react-native-gesture-handler"
+import { ScrollView, TouchableHighlight } from "react-native-gesture-handler"
+import { Slider } from "react-native-elements"
 
 interface OwnProps {}
 
@@ -32,9 +33,17 @@ interface DispatchProps {
 
 type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
-interface State {}
+interface State {
+  editingGoal: Goal | null
+  goalProgressSliderValue: number
+}
 
 class Goals extends React.PureComponent<Props, State> {
+  state: State = {
+    editingGoal: null,
+    goalProgressSliderValue: 0,
+  }
+
   componentDidMount() {
     this.props.goalActions.getGoalsRequest()
   }
@@ -43,8 +52,25 @@ class Goals extends React.PureComponent<Props, State> {
   getUpperProgressBound = (progress: number): number =>
     Math.min(95, 100 - progress)
 
+  updateProgress = () => {
+    const goal = this.state.editingGoal
+
+    const newGoal = { ...goal }
+    newGoal.progress = this.state.goalProgressSliderValue
+
+    this.props.goalActions.updateGoalRequest({ goal: newGoal })
+  }
+
+  activateModal = (goal: Goal) =>
+    this.setState({
+      editingGoal: goal,
+    })
+
   render(): JSX.Element {
     const { goals } = this.props
+    const { editingGoal, goalProgressSliderValue } = this.state
+
+    const modalVisible = !!editingGoal
 
     return (
       <Auth>
@@ -54,6 +80,23 @@ class Goals extends React.PureComponent<Props, State> {
               Goals
             </MText>
           </View>
+          <Modal
+            transparent={true}
+            visible={modalVisible}
+            animationType="slide"
+          >
+            <View>
+              <Slider
+                value={goalProgressSliderValue}
+                minimumValue={0}
+                maximumValue={100}
+                onValueChange={(progress) =>
+                  this.setState({ goalProgressSliderValue: progress })
+                }
+                onSlidingComplete={this.updateProgress}
+              />
+            </View>
+          </Modal>
           <ScrollView style={{}}>
             {goals.map((goal) => (
               <View key={`goal-${goal.inner.id}-view`} style={{}}>
@@ -66,12 +109,13 @@ class Goals extends React.PureComponent<Props, State> {
                       key={`goal-badge-container-${child.id}`}
                       style={styles.subgoalContainer}
                     >
-                      <View
+                      <TouchableHighlight
                         style={styles.subgoalBadge}
                         key={`goal-badge-${child.id}`}
+                        onPress={() => this.activateModal(child)}
                       >
                         <MText style={styles.subgoalText}>{child.name}</MText>
-                      </View>
+                      </TouchableHighlight>
                       <View style={styles.gradientContainer}>
                         <View
                           style={StyleSheet.flatten([

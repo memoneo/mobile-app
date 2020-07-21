@@ -12,6 +12,7 @@
     "@react-native-community/datetimepicker": "^2.6.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/picker": "^1.6.5",
+    "@react-native-community/slider": "^3.0.3",
     "@tradle/react-native-http": "^2.0.1",
     "await-protect": "^1.0.13",
     "axios": "^0.19.2",

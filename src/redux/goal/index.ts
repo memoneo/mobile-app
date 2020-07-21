@@ -121,7 +121,7 @@ export const goalReducer = handleActions<GoalState, any>(
         goal.deleted = true
 
         if (hardDeleted) {
-          const currentIndex = newGoals.findIndex(g => g.id === goal.id)
+          const currentIndex = newGoals.findIndex((g) => g.id === goal.id)
 
           newGoals.splice(currentIndex, 1)
         }
@@ -159,7 +159,7 @@ export const goalReducer = handleActions<GoalState, any>(
       }
     },
     /**
-     * TODO there is still a bug 
+     * TODO there is still a bug
      */
     [actionNames.CREATE_GOAL_RESPONSE]: (state: GoalState, action) => {
       const goal: Goal | undefined = action.payload.goal
@@ -168,9 +168,7 @@ export const goalReducer = handleActions<GoalState, any>(
       const newGoals: Goal[] = [...state.goals]
       if (goal && !error) {
         if (goal.parent) {
-          const parentGoalIdx = newGoals.findIndex(
-            g => g.id === goal.parent
-          )
+          const parentGoalIdx = newGoals.findIndex((g) => g.id === goal.parent)
           goal.parent = newGoals[parentGoalIdx]
 
           var insertIdx = parentGoalIdx + 1
@@ -180,7 +178,7 @@ export const goalReducer = handleActions<GoalState, any>(
             }
 
             const nextGoal = newGoals[insertIdx]
-            
+
             insertIdx += 1
 
             if ((<Goal>goal.parent).id !== nextGoal.parent) break
@@ -214,7 +212,7 @@ export const goalReducer = handleActions<GoalState, any>(
 
       if (!error) {
         const idx = newGoals.findIndex(
-          currentGoal => currentGoal.id === goal.id
+          (currentGoal) => currentGoal.id === goal.id
         )
         if (idx !== -1) {
           newGoals[idx] = goal
@@ -426,6 +424,7 @@ function* handleUpdateGoal(action: any) {
           id: goal.id,
           name: goal.name,
           description: goal.description,
+          progress: goal.progress,
           recover,
         },
         {
