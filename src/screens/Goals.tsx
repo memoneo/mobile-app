@@ -9,9 +9,11 @@ import LinearGradient from "react-native-linear-gradient"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
 import { GoalActions } from "../redux/goal"
-import { colors, borderRadius } from "../lib/colors"
+import { colors, borderRadius, positiveColor } from "../lib/colors"
 import { ScrollView, TouchableHighlight } from "react-native-gesture-handler"
 import { Slider } from "react-native-elements"
+import MButton from "../components/common/MButton"
+import { modalStyles } from "../lib/styleVars"
 
 interface OwnProps {}
 
@@ -52,18 +54,21 @@ class Goals extends React.PureComponent<Props, State> {
   getUpperProgressBound = (progress: number): number =>
     Math.min(95, 100 - progress)
 
-  updateProgress = () => {
+  updateProgressAndCloseModal = () => {
     const goal = this.state.editingGoal
 
     const newGoal = { ...goal }
     newGoal.progress = this.state.goalProgressSliderValue
 
     this.props.goalActions.updateGoalRequest({ goal: newGoal })
+
+    this.setState({ editingGoal: null })
   }
 
   activateModal = (goal: Goal) =>
     this.setState({
       editingGoal: goal,
+      goalProgressSliderValue: goal.progress,
     })
 
   render(): JSX.Element {
@@ -85,16 +90,22 @@ class Goals extends React.PureComponent<Props, State> {
             visible={modalVisible}
             animationType="slide"
           >
-            <View>
+            <View style={modalStyles.modalView}>
+              <MText bold>Set progress</MText>
+              <MText>{goalProgressSliderValue}% done</MText>
               <Slider
                 value={goalProgressSliderValue}
+                style={styles.slider}
                 minimumValue={0}
+                step={5}
                 maximumValue={100}
+                thumbTintColor={positiveColor}
+                minimumTrackTintColor={positiveColor}
                 onValueChange={(progress) =>
                   this.setState({ goalProgressSliderValue: progress })
                 }
-                onSlidingComplete={this.updateProgress}
               />
+              <MButton title="Ok" onPress={this.updateProgressAndCloseModal} />
             </View>
           </Modal>
           <ScrollView style={{}}>
@@ -229,5 +240,8 @@ const styles = StyleSheet.create({
   subgoalContainer: {
     margin: 2,
     maxWidth: 100,
+  },
+  slider: {
+    width: 80,
   },
 })

@@ -12,6 +12,9 @@ export const contentDiffColor = "#dedede"
 export const contentColor = "#fff"
 export const focusedTextColor = "#0068ff"
 
+export const positiveColor = "green"
+export const neutralColor = "grey"
+
 export const RATING_1_COLOR = "#79e155"
 export const RATING_2_COLOR = "#dbdf5f"
 export const RATING_3_COLOR = "gold"
