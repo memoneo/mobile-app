@@ -333,7 +333,7 @@ class AddEntry extends React.PureComponent<Props, State> {
                 <MPicker
                   selectedValue={dateType}
                   enabled={false}
-                  onValueChange={(value) => this.setState({ dateType: value })}
+                  onValueChange={(value) => this.setState({ dateType: value as TopicLogDateType })}
                 >
                   <Picker.Item label="Daily" value="daily" />
                   <Picker.Item label="Weekly" value="weekly" />

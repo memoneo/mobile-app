@@ -425,6 +425,7 @@ function* handleUpdateGoal(action: any) {
           name: goal.name,
           description: goal.description,
           progress: goal.progress,
+          status: goal.status,
           recover,
         },
         {

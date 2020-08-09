@@ -28,6 +28,7 @@ import { TouchableOpacity } from "react-native-gesture-handler"
 export interface EditGoalProps extends NavigationInjectedProps {
   goal: Goal
   goalActions: typeof GoalActions
+  subgoalMap: { [key: string]: Goal[] }
   drag?: () => void
   isDragging?: boolean
   isDraggingSelf?: boolean
@@ -51,7 +52,16 @@ const EditGoalSchema = Yup.object().shape({
 
 class EditGoal extends React.Component<EditGoalProps, State> {
   deleteGoal = () => {
-    const { goalActions, goal } = this.props
+    const { goalActions, goal, subgoalMap } = this.props
+
+    if (subgoalMap.hasOwnProperty(goal.id)) {
+      Alert.alert(
+        "Goal still has subgoals",
+        `${goal.name} still has subgoals. Please delete them first.`,
+        [{ text: "OK" }]
+      )
+      return
+    }
 
     const deleteActionName = goal.deleted ? "hard deleting" : "deleting"
     Alert.alert(
@@ -101,8 +111,9 @@ class EditGoal extends React.Component<EditGoalProps, State> {
             description: goal.description,
           }}
           onSubmit={() => {}}
-          validationSchema={EditGoalSchema}>
-          {formikProps => (
+          validationSchema={EditGoalSchema}
+        >
+          {(formikProps) => (
             <EditGoalInner
               {...this.props}
               {...formikProps}

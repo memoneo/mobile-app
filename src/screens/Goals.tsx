@@ -2,7 +2,7 @@ import * as React from "react"
 import { View, StyleSheet, Modal } from "react-native"
 import Auth from "../components/Auth"
 import { NavigationInjectedProps, withNavigation } from "react-navigation"
-import { User, Goal } from "memoneo-common/lib/types"
+import { User, Goal, GoalStatus } from "memoneo-common/lib/types"
 import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
 import LinearGradient from "react-native-linear-gradient"
@@ -14,6 +14,8 @@ import { ScrollView, TouchableHighlight } from "react-native-gesture-handler"
 import { Slider } from "react-native-elements"
 import MButton from "../components/common/MButton"
 import { modalStyles } from "../lib/styleVars"
+import MPicker from "../components/common/MPicker"
+import { Picker } from "@react-native-community/picker"
 
 interface OwnProps {}
 
@@ -38,12 +40,14 @@ type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 interface State {
   editingGoal: Goal | null
   goalProgressSliderValue: number
+  status: GoalStatus
 }
 
 class Goals extends React.PureComponent<Props, State> {
   state: State = {
     editingGoal: null,
     goalProgressSliderValue: 0,
+    status: "active",
   }
 
   componentDidMount() {
@@ -69,11 +73,12 @@ class Goals extends React.PureComponent<Props, State> {
     this.setState({
       editingGoal: goal,
       goalProgressSliderValue: goal.progress,
+      status: goal.status,
     })
 
   render(): JSX.Element {
     const { goals } = this.props
-    const { editingGoal, goalProgressSliderValue } = this.state
+    const { editingGoal, goalProgressSliderValue, status } = this.state
 
     const modalVisible = !!editingGoal
 
@@ -91,7 +96,7 @@ class Goals extends React.PureComponent<Props, State> {
             animationType="slide"
           >
             <View style={modalStyles.modalView}>
-              <MText bold>Set progress</MText>
+              <MText bold>Progress</MText>
               <MText>{goalProgressSliderValue}% done</MText>
               <Slider
                 value={goalProgressSliderValue}
@@ -105,6 +110,18 @@ class Goals extends React.PureComponent<Props, State> {
                   this.setState({ goalProgressSliderValue: progress })
                 }
               />
+              <MText bold>Status</MText>
+              <MPicker
+                selectedValue={status}
+                style={{ width: 200 }}
+                onValueChange={(value) =>
+                  this.setState({ status: value as GoalStatus })
+                }
+              >
+                <Picker.Item label="Active" value="active" />
+                <Picker.Item label="On hold" value="on_hold" />
+                <Picker.Item label="Cancelled" value="cancelled" />
+              </MPicker>
               <MButton title="Ok" onPress={this.updateProgressAndCloseModal} />
             </View>
           </Modal>

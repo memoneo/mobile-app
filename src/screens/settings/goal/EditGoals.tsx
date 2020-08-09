@@ -89,7 +89,7 @@ class EditTopics extends React.PureComponent<Props, State> {
           <View style={styles.listContainer}>
             <DraggableFlatList
               data={baseGoals}
-              keyExtractor={goal => goal.id}
+              keyExtractor={(goal) => goal.id}
               onDragBegin={() =>
                 this.setState({ dragging: true, showSubgoals: "" })
               }
@@ -124,6 +124,7 @@ class EditTopics extends React.PureComponent<Props, State> {
                       isDragging={this.state.dragging}
                       isDraggingSelf={isActive}
                       goalActions={goalActions}
+                      subgoalMap={subgoalMap}
                       navigation={this.props.navigation}
                     />
                     {hasChildren && !isActive && !this.state.dragging && (
@@ -134,14 +135,16 @@ class EditTopics extends React.PureComponent<Props, State> {
                           title={isShowingSubgoals ? "-" : "..."}
                           onPress={() => this.showOrToggleSubgoals(item)}
                         />
-                        {!!isShowingSubgoals && subgoalMap[item.id].map(childGoal => (
-                          <EditGoal
-                            key={`EditGoal-child-${childGoal.id}`}
-                            goal={childGoal}
-                            goalActions={goalActions}
-                            navigation={this.props.navigation}
-                          />
-                        ))}
+                        {!!isShowingSubgoals &&
+                          subgoalMap[item.id].map((childGoal) => (
+                            <EditGoal
+                              key={`EditGoal-child-${childGoal.id}`}
+                              goal={childGoal}
+                              subgoalMap={subgoalMap}
+                              goalActions={goalActions}
+                              navigation={this.props.navigation}
+                            />
+                          ))}
                       </>
                     )}
                   </>
@@ -155,16 +158,14 @@ class EditTopics extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loadingTopic = state.goal.loading
   const loading = loadingTopic
 
   const goals = state.goal.goals
-  const baseGoals = goals.filter(goal => !goal.parent)
+  const baseGoals = goals.filter((goal) => !goal.parent)
 
   const subgoalMap: { [key: string]: Goal[] } = {}
   for (let goal of goals) {
@@ -186,10 +187,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     goalActions: bindActionCreators(GoalActions, dispatch),
   }
