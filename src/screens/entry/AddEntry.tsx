@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
-  Picker,
   Button,
   Alert,
+  FlatList,
 } from "react-native"
 import {
   Topic,
@@ -41,6 +41,8 @@ import { TopicActions, TopicLogValueMap } from "../../redux/topic"
 import { PersonActions } from "../../redux/person"
 import { Dayjs } from "dayjs"
 import { GoalActions } from "../../redux/goal"
+import { Picker } from "@react-native-community/picker"
+import AddEntryInner from "./AddEntryInner"
 
 interface OwnProps {}
 
@@ -327,13 +329,15 @@ class AddEntry extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.main}>
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View>
             <View style={styles.optionsContainer}>
               <View style={{ flex: 1 }}>
                 <MPicker
                   selectedValue={dateType}
                   enabled={false}
-                  onValueChange={(value) => this.setState({ dateType: value as TopicLogDateType })}
+                  onValueChange={(value) =>
+                    this.setState({ dateType: value as TopicLogDateType })
+                  }
                 >
                   <Picker.Item label="Daily" value="daily" />
                   <Picker.Item label="Weekly" value="weekly" />
@@ -385,50 +389,31 @@ class AddEntry extends React.PureComponent<Props, State> {
               </View>
             )}
             {hasPermissions && hasTopicLog && (
-              <View>
-                {topics.map((topic) => {
-                  const isRecordingTopic =
-                    recording.length > 0 && recording === topic.id
-                  const isRecordingDifferentTopic =
-                    recording.length > 0 && recording !== topic.id
-                  const isPlayingTopic =
-                    playing.length > 0 && playing === topic.id
-                  const isPlayingDifferentTopic =
-                    playing.length > 0 && playing !== topic.id
-                  const hasRecording = topicRecordMap.hasOwnProperty(topic.id)
-
-                  const outerValue = topicLogValueMap[topic.id]
-                  const innerValue = outerValue ? outerValue.value : undefined
-
-                  return (
-                    <AddEntryTopicContainer
-                      key={`add-entry-topic-${topic.id}`}
-                      topic={topic}
-                      topicLog={topicLog}
-                      topicActions={topicActions}
-                      persons={persons}
-                      goals={goals}
-                      date={date}
-                      dateType={dateType}
-                      value={innerValue}
-                      canRecord={this.canRecord()}
-                      isRecordingTopic={isRecordingTopic}
-                      isRecordingDifferentTopic={isRecordingDifferentTopic}
-                      isPlaying={isPlayingTopic}
-                      isPlayingDifferentTopic={isPlayingDifferentTopic}
-                      hasRecording={hasRecording}
-                      startRecording={() => this.startRecording(topic)}
-                      playRecording={() =>
-                        this.playRecording(topic, date, dateType)
-                      }
-                      stopPlayRecording={() => this.stopPlayRecording()}
-                      stopRecording={() => this.stopRecording({ topic })}
-                    />
-                  )
-                })}
-              </View>
+              <FlatList
+                data={topics}
+                renderItem={(t) => (
+                  <AddEntryInner
+                    topic={t.item}
+                    topicActions={topicActions}
+                    goals={goals}
+                    persons={persons}
+                    topicRecordMap={topicRecordMap}
+                    topicLogValueMap={topicLogValueMap}
+                    date={date}
+                    dateType={dateType}
+                    recording={recording}
+                    playing={playing}
+                    topicLog={topicLog}
+                    startRecording={this.startRecording}
+                    stopRecording={this.stopRecording}
+                    playRecording={this.playRecording}
+                    stopPlayRecording={this.stopPlayRecording}
+                    canRecord={this.canRecord}
+                  />
+                )}
+              />
             )}
-          </ScrollView>
+          </View>
         </SafeAreaView>
       </Auth>
     )

@@ -16,6 +16,7 @@ import MButton from "../components/common/MButton"
 import { modalStyles } from "../lib/styleVars"
 import MPicker from "../components/common/MPicker"
 import { Picker } from "@react-native-community/picker"
+import MBadge from "../components/common/MBadge"
 
 interface OwnProps {}
 
@@ -41,6 +42,8 @@ interface State {
   editingGoal: Goal | null
   goalProgressSliderValue: number
   status: GoalStatus
+  showNonActive: boolean
+  hideCompleted: boolean
 }
 
 class Goals extends React.PureComponent<Props, State> {
@@ -48,6 +51,8 @@ class Goals extends React.PureComponent<Props, State> {
     editingGoal: null,
     goalProgressSliderValue: 0,
     status: "active",
+    showNonActive: false,
+    hideCompleted: true,
   }
 
   componentDidMount() {
@@ -58,16 +63,21 @@ class Goals extends React.PureComponent<Props, State> {
   getUpperProgressBound = (progress: number): number =>
     Math.min(95, 100 - progress)
 
-  updateProgressAndCloseModal = () => {
+  updateGoalDataAndCloseModal = () => {
     const goal = this.state.editingGoal
 
+    const { goalProgressSliderValue, status } = this.state
+
     const newGoal = { ...goal }
-    newGoal.progress = this.state.goalProgressSliderValue
+    newGoal.progress = goalProgressSliderValue
+    newGoal.status = status
 
     this.props.goalActions.updateGoalRequest({ goal: newGoal })
 
-    this.setState({ editingGoal: null })
+    this.closeModal()
   }
+
+  closeModal = () => this.setState({ editingGoal: null })
 
   activateModal = (goal: Goal) =>
     this.setState({
@@ -75,6 +85,13 @@ class Goals extends React.PureComponent<Props, State> {
       goalProgressSliderValue: goal.progress,
       status: goal.status,
     })
+
+  isGoalShown = (goal: Goal): boolean =>
+    !goal.deleted &&
+    (!this.state.hideCompleted ||
+      (this.state.hideCompleted && goal.progress < 100)) &&
+    (this.state.showNonActive ||
+      (!this.state.showNonActive && goal.status === "active"))
 
   render(): JSX.Element {
     const { goals } = this.props
@@ -89,6 +106,26 @@ class Goals extends React.PureComponent<Props, State> {
             <MText h2 bold>
               Goals
             </MText>
+            <View style={styles.headerButtons}>
+              <MButton
+                buttonStyle={styles.headerButtonStyle}
+                titleStyle={styles.headerButtonTextStyle}
+                title="Hide completed"
+                type={this.state.hideCompleted ? "solid" : "outline"}
+                onPress={() =>
+                  this.setState({ hideCompleted: !this.state.hideCompleted })
+                }
+              />
+              <MButton
+                buttonStyle={styles.headerButtonStyle}
+                titleStyle={styles.headerButtonTextStyle}
+                title="Show non-active"
+                type={this.state.showNonActive ? "solid" : "outline"}
+                onPress={() =>
+                  this.setState({ showNonActive: !this.state.showNonActive })
+                }
+              />
+            </View>
           </View>
           <Modal
             transparent={true}
@@ -122,57 +159,95 @@ class Goals extends React.PureComponent<Props, State> {
                 <Picker.Item label="On hold" value="on_hold" />
                 <Picker.Item label="Cancelled" value="cancelled" />
               </MPicker>
-              <MButton title="Ok" onPress={this.updateProgressAndCloseModal} />
+              <MButton title="Ok" onPress={this.updateGoalDataAndCloseModal} />
             </View>
           </Modal>
           <ScrollView style={{}}>
-            {goals.map((goal) => (
-              <View key={`goal-${goal.inner.id}-view`} style={{}}>
-                <View style={styles.goalTitle}>
-                  <MText bold>{goal.inner.name}</MText>
-                </View>
-                <View style={styles.children}>
-                  {goal.children.map((child) => (
-                    <View
-                      key={`goal-badge-container-${child.id}`}
-                      style={styles.subgoalContainer}
+            {goals
+              .filter((goal) => this.isGoalShown(goal.inner))
+              .map((goal) => (
+                <View key={`goal-${goal.inner.id}-view`} style={{}}>
+                  <View style={styles.goalTitle}>
+                    <TouchableHighlight
+                      style={styles.goalBadge}
+                      key={`goal-badge-${goal.inner.id}`}
+                      onPress={() => this.activateModal(goal.inner)}
                     >
-                      <TouchableHighlight
-                        style={styles.subgoalBadge}
-                        key={`goal-badge-${child.id}`}
-                        onPress={() => this.activateModal(child)}
-                      >
-                        <MText style={styles.subgoalText}>{child.name}</MText>
-                      </TouchableHighlight>
-                      <View style={styles.gradientContainer}>
-                        <View
-                          style={StyleSheet.flatten([
-                            styles.gradient1,
-                            {
-                              width: `${this.getLowerProgressBound(
-                                child.progress
-                              )}%`,
-                            },
-                          ])}
-                          key={`goal-gradient1-${child.id}`}
-                        />
-                        <View
-                          style={StyleSheet.flatten([
-                            styles.gradient2,
-                            {
-                              width: `${this.getUpperProgressBound(
-                                child.progress
-                              )}%`,
-                            },
-                          ])}
-                          key={`goal-gradient2-${child.id}`}
-                        />
-                      </View>
+                      <MText bold style={styles.goalText}>
+                        {goal.inner.name}
+                      </MText>
+                    </TouchableHighlight>
+                    <View style={styles.gradientContainer}>
+                      <View
+                        style={StyleSheet.flatten([
+                          styles.gradient1,
+                          {
+                            width: `${this.getLowerProgressBound(
+                              goal.inner.progress
+                            )}%`,
+                          },
+                        ])}
+                        key={`goal-gradient1-${goal.inner.id}`}
+                      />
+                      <View
+                        style={StyleSheet.flatten([
+                          styles.gradient2,
+                          {
+                            width: `${this.getUpperProgressBound(
+                              goal.inner.progress
+                            )}%`,
+                          },
+                        ])}
+                        key={`goal-gradient2-${goal.inner.id}`}
+                      />
                     </View>
-                  ))}
+                  </View>
+                  <View style={styles.children}>
+                    {goal.children
+                      .filter((child) => this.isGoalShown(child))
+                      .map((child) => (
+                        <View
+                          key={`goal-badge-container-${child.id}`}
+                          style={styles.subgoalContainer}
+                        >
+                          <TouchableHighlight
+                            style={styles.subgoalBadge}
+                            key={`goal-badge-${child.id}`}
+                            onPress={() => this.activateModal(child)}
+                          >
+                            <MText style={styles.subgoalText}>
+                              {child.name}
+                            </MText>
+                          </TouchableHighlight>
+                          <View style={styles.gradientContainer}>
+                            <View
+                              style={StyleSheet.flatten([
+                                styles.gradient1,
+                                {
+                                  width: `${this.getLowerProgressBound(
+                                    child.progress
+                                  )}%`,
+                                },
+                              ])}
+                              key={`goal-gradient1-${child.id}`}
+                            />
+                            <View
+                              style={StyleSheet.flatten([
+                                styles.gradient2,
+                                {
+                                  width: `${this.getUpperProgressBound(
+                                    child.progress
+                                  )}%`,
+                                },
+                              ])}
+                              key={`goal-gradient2-${child.id}`}
+                            />
+                          </View>
+                        </View>
+                      ))}
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
           </ScrollView>
         </View>
       </Auth>
@@ -219,8 +294,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#fff",
   },
-  header: {},
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerButtons: {
+    flexDirection: "row",
+  },
+  headerButtonStyle: {
+    height: 20,
+    width: 120,
+    padding: 2,
+    borderRadius: 8,
+    marginRight: 4,
+  },
+  headerButtonTextStyle: {
+    fontSize: 10,
+  },
   goalTitle: {
+    marginLeft: 2,
     marginBottom: 4,
   },
   children: {
@@ -228,11 +322,21 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginBottom: 8,
   },
-  subgoalBadge: {
+  goalBadge: {
     backgroundColor: colors.primaryColor,
     borderTopLeftRadius: borderRadius,
     borderTopRightRadius: borderRadius,
     padding: 4,
+  },
+  subgoalBadge: {
+    backgroundColor: colors.secondaryColor,
+    borderTopLeftRadius: borderRadius,
+    borderTopRightRadius: borderRadius,
+    padding: 4,
+  },
+  goalText: {
+    color: "#fff",
+    fontSize: 11,
   },
   subgoalText: {
     color: "#fff",

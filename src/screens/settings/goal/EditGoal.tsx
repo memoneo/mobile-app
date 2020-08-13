@@ -54,7 +54,7 @@ class EditGoal extends React.Component<EditGoalProps, State> {
   deleteGoal = () => {
     const { goalActions, goal, subgoalMap } = this.props
 
-    if (subgoalMap.hasOwnProperty(goal.id)) {
+    if (subgoalMap.hasOwnProperty(goal.id) && goal.deleted) {
       Alert.alert(
         "Goal still has subgoals",
         `${goal.name} still has subgoals. Please delete them first.`,

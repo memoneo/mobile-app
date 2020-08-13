@@ -44,6 +44,9 @@ class Home extends React.PureComponent<Props, State> {
     this.props.goalActions.getGoalsRequest()
   }
 
+  isGoalShown = (goal: Goal): boolean =>
+    !goal.deleted && goal.progress < 100 && goal.status === "active"
+
   render(): JSX.Element {
     const { ownUser, topicLogs, goals, navigation } = this.props
 
@@ -74,11 +77,13 @@ class Home extends React.PureComponent<Props, State> {
               />
             </View>
             <View style={styles.goalInnerContainer}>
-              {goals.map(goal => (
-                <View key={`goal-${goal.id}-view`} style={styles.goal}>
-                  <MBadge key={`goal-${goal.id}`} value={goal.name} />
-                </View>
-              ))}
+              {goals
+                .filter((goal) => this.isGoalShown(goal))
+                .map((goal) => (
+                  <View key={`goal-${goal.id}-view`} style={styles.goal}>
+                    <MBadge key={`goal-${goal.id}`} value={goal.name} />
+                  </View>
+                ))}
             </View>
           </View>
           <View style={styles.topicContainer}>
@@ -88,16 +93,18 @@ class Home extends React.PureComponent<Props, State> {
             {adjustedTopicLogs.length === 0 && <MText>No entries found.</MText>}
             {adjustedTopicLogs.length > 0 && (
               <View>
-                {adjustedTopicLogs.map(topicLog => (
+                {adjustedTopicLogs.map((topicLog) => (
                   <View
                     key={`topicLog-${topicLog.id}`}
-                    style={styles.topicLogEntry}>
+                    style={styles.topicLogEntry}
+                  >
                     <MText
                       onPress={() =>
                         this.props.navigation.navigate("AddEntry", {
                           date: topicLog.date,
                         })
-                      }>
+                      }
+                    >
                       {topicLog.date.format("D MMMM YYYY")}
                     </MText>
                     <MBadge value={`${formatDateType(topicLog.dateType)}`} />
@@ -121,15 +128,13 @@ class Home extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loading = state.user.loading
   const error = state.user.error
   const ownUser = state.user.ownUser
-  const goals = state.goal.goals.filter(goal => !goal.parent)
+  const goals = state.goal.goals.filter((goal) => !goal.parent)
   const topicLogs = state.topic.topicLogs
 
   return {
@@ -141,10 +146,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     userActions: bindActionCreators(UserActions, dispatch),
     topicActions: bindActionCreators(TopicActions, dispatch),

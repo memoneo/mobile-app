@@ -118,6 +118,9 @@ export const goalReducer = handleActions<GoalState, any>(
       const newGoals: Goal[] = [...state.goals]
 
       if (!error) {
+        const subgoals = newGoals.filter((g) => g.parent === goal.id)
+        subgoals.forEach((g) => (g.deleted = true))
+
         goal.deleted = true
 
         if (hardDeleted) {

@@ -1,6 +1,7 @@
 import { RatedType } from "../types/AddEntry"
 
 export const primaryColor = "#a4c9ff"
+export const secondaryColor = "#7F8E9D"
 
 export const borderColor = "#d8dee2"
 export const borderRadius = 4
@@ -22,7 +23,8 @@ export const RATING_4_COLOR = "orange"
 export const RATING_5_COLOR = "#ff7c5e"
 
 export const colors = {
-    primaryColor
+    primaryColor,
+    secondaryColor
 }
 
 export function getColorForRating(rating: number, ratedType: RatedType): string {
