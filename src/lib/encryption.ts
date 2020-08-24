@@ -32,10 +32,13 @@ export async function decryptText(
   cipherText: string,
   key: string
 ): Promise<string> {
+  //console.log("Decrypting")
   const cipherSplit = cipherText.split(IV_SEPARATOR)
   const iv = cipherSplit[0]
   const encryptedText = cipherSplit[1]
   const newKey = await generateKey(key)
 
-  return await Aes.decrypt(encryptedText, newKey, iv)
+  const decryptedText = await Aes.decrypt(encryptedText, newKey, iv)
+  //console.log(decryptedText)
+  return decryptedText
 }

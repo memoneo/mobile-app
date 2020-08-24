@@ -19,10 +19,13 @@ export async function decryptTopicLogValues(
   key: string
 ) {
   for (let topicLogValue of topicLogValues) {
+    // console.log("===\nFound topicLogValue, decrypt?")
     if (topicLogValue.encrypted) {
+      // console.log("Is encrypted with type " + topicLogValue.type)
       switch (topicLogValue.type) {
         case "text-simple":
         case "text-5rated":
+          // console.log("Decrypting")
           const value = topicLogValue.value as
             | TopicLogValueTextSimple
             | TopicLogValueTextFiveRated
@@ -32,8 +35,10 @@ export async function decryptTopicLogValues(
             value.text = decryptedText
           }
         default:
+          // console.log("Continuing")
           continue
       }
     }
+    // console.log("===")
   }
 }

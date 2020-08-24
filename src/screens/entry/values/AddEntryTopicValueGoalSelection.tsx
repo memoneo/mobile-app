@@ -50,7 +50,9 @@ class AddEntryTopicValueGoalSelection extends React.Component<Props, State> {
     }
   }
 
-  getSelectableGoals = () => this.props.goals.filter((goal) => !goal.parent)
+  getSelectableGoals = () => this.props.goals.filter((goal) => !goal.parent && this.isGoalShown(goal))
+  isGoalShown = (goal: Goal): boolean =>
+    !goal.deleted && goal.progress < 100 && goal.status === "active"
 
   render(): JSX.Element {
     let { selectedGoals } = this.state
