@@ -3,12 +3,13 @@ import { TextStyle, StyleProp, StyleSheet } from "react-native"
 import { Badge, BadgeProps } from "react-native-elements"
 import { primaryColor } from "../../lib/colors"
 
-interface OwnProps extends BadgeProps {}
+interface OwnProps extends BadgeProps {
+}
 
-const MBadge: React.FC<OwnProps> = ({ ...props }) => (
+const MBadge: React.FC<OwnProps> = ({ badgeStyle, ...props }) => (
   <Badge
     textStyle={styles.badgeTextStyle}
-    badgeStyle={styles.badgeBadgeStyle}
+    badgeStyle={StyleSheet.flatten([badgeStyle, styles.badgeBadgeStyle])}
     {...props}
   />
 )

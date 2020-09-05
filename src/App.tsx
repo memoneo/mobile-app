@@ -4,6 +4,7 @@ import { Audio } from "expo-av"
 
 import Navigator from "./components/Navigator"
 import store from "./store"
+import { StatusBar } from "react-native"
 
 interface State {
   isReady: boolean
@@ -20,6 +21,7 @@ export default class App extends React.PureComponent<{}, State> {
   render(): JSX.Element {
     return (
       <Provider store={store}>
+        <StatusBar backgroundColor="black" />
         <Navigator />
       </Provider>
     )

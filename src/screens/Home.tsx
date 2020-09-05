@@ -98,6 +98,10 @@ class Home extends React.PureComponent<Props, State> {
                     key={`topicLog-${topicLog.id}`}
                     style={styles.topicLogEntry}
                   >
+                    <MBadge
+                      badgeStyle={styles.topicLogEntryBadge}
+                      value={`${formatDateType(topicLog.dateType)}`}
+                    />
                     <MText
                       onPress={() =>
                         this.props.navigation.navigate("AddEntry", {
@@ -107,7 +111,6 @@ class Home extends React.PureComponent<Props, State> {
                     >
                       {topicLog.date.format("D MMMM YYYY")}
                     </MText>
-                    <MBadge value={`${formatDateType(topicLog.dateType)}`} />
                   </View>
                 ))}
               </View>
@@ -204,10 +207,11 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   topicLogEntry: {
-    width: 140,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+  },
+  topicLogEntryBadge: {
+    marginRight: 8
   },
   lastEntriesTitle: {
     marginBottom: 8,
