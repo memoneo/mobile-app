@@ -527,8 +527,8 @@ function* handleCreateOrUpdateTopicLogValue(action) {
       }
 
       textValue.text = encryptionRes.ok!
-      body.encrypted = true
     }
+    body.encrypted = true
   }
 
   const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(

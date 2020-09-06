@@ -62,3 +62,5 @@ buck-out/
 .expo/*
 web-build/
 android/app/src/main/res/raw/node_modules_*
+
+*.bundle

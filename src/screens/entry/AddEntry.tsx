@@ -6,6 +6,8 @@ import {
   Button,
   Alert,
   FlatList,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native"
 import {
   Topic,
@@ -43,6 +45,7 @@ import { Dayjs } from "dayjs"
 import { GoalActions } from "../../redux/goal"
 import { Picker } from "@react-native-community/picker"
 import AddEntryInner from "./AddEntryInner"
+import content from "*.svg"
 
 interface OwnProps {}
 
@@ -84,6 +87,7 @@ interface State {
   dateType: TopicLogDateType
   date: AddEntryDate
   showDatePicker: boolean
+  showOptions: boolean
   recording: string
   playing: string
 }
@@ -98,6 +102,7 @@ class AddEntry extends React.PureComponent<Props, State> {
     showDatePicker: false,
     recording: "",
     playing: "",
+    showOptions: true,
   }
 
   sound?: Audio.Sound = null
@@ -303,6 +308,18 @@ class AddEntry extends React.PureComponent<Props, State> {
     }
   }
 
+  handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (this.state.showOptions) {
+      if (event.nativeEvent.contentOffset.y > 0) {
+        this.setState({ showOptions: false })
+      }
+    } else {
+      if (event.nativeEvent.contentOffset.y === 0) {
+        this.setState({ showOptions: true })
+      }
+    }
+  }
+
   render(): JSX.Element {
     const {
       topics,
@@ -330,42 +347,44 @@ class AddEntry extends React.PureComponent<Props, State> {
       <Auth>
         <SafeAreaView style={styles.main}>
           <View>
-            <View style={styles.optionsContainer}>
-              <View style={{ flex: 1 }}>
-                <MPicker
-                  selectedValue={dateType}
-                  enabled={false}
-                  onValueChange={(value) =>
-                    this.setState({ dateType: value as TopicLogDateType })
-                  }
-                >
-                  <Picker.Item label="Daily" value="daily" />
-                  <Picker.Item label="Weekly" value="weekly" />
-                  <Picker.Item label="Monthly" value="monthly" />
-                  <Picker.Item label="Yearly" value="yearly" />
-                </MPicker>
-              </View>
-              {dateType === "daily" && (
-                <>
-                  <View>
-                    <MButton
-                      buttonStyle={styles.optionsButton}
-                      titleStyle={styles.optionsButtonTitle}
-                      onPress={() => this.setState({ showDatePicker: true })}
-                      title="Select day"
-                    />
-                    {showDatePicker && (
-                      <DateTimePicker
-                        value={date}
-                        mode="date"
-                        display="default"
-                        onChange={this.setDate}
+            {this.state.showOptions && (
+              <View style={styles.optionsContainer}>
+                <View style={{ flex: 1 }}>
+                  <MPicker
+                    selectedValue={dateType}
+                    enabled={false}
+                    onValueChange={(value) =>
+                      this.setState({ dateType: value as TopicLogDateType })
+                    }
+                  >
+                    <Picker.Item label="Daily" value="daily" />
+                    <Picker.Item label="Weekly" value="weekly" />
+                    <Picker.Item label="Monthly" value="monthly" />
+                    <Picker.Item label="Yearly" value="yearly" />
+                  </MPicker>
+                </View>
+                {dateType === "daily" && (
+                  <>
+                    <View>
+                      <MButton
+                        buttonStyle={styles.optionsButton}
+                        titleStyle={styles.optionsButtonTitle}
+                        onPress={() => this.setState({ showDatePicker: true })}
+                        title="Select day"
                       />
-                    )}
-                  </View>
-                </>
-              )}
-            </View>
+                      {showDatePicker && (
+                        <DateTimePicker
+                          value={date}
+                          mode="date"
+                          display="default"
+                          onChange={this.setDate}
+                        />
+                      )}
+                    </View>
+                  </>
+                )}
+              </View>
+            )}
             {dateType === "daily" && (
               <View>
                 <MText h3 bold>
@@ -391,6 +410,8 @@ class AddEntry extends React.PureComponent<Props, State> {
             {hasPermissions && hasTopicLog && (
               <FlatList
                 data={topics}
+                onScroll={this.handleScroll}
+                style={styles.entryList}
                 renderItem={(t) => (
                   <AddEntryInner
                     topic={t.item}
@@ -511,4 +532,7 @@ const styles = StyleSheet.create({
   optionsButtonTitle: {
     fontSize: 11,
   },
+  entryList: {
+    marginBottom: 40
+  }
 })

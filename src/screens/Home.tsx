@@ -11,7 +11,7 @@ import { bindActionCreators } from "redux"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
 import Header from "../components/Header"
-import { TopicActions } from "../redux/topic"
+import { TopicActions, TopicLogValueMap } from "../redux/topic"
 import { formatDateType } from "../lib/format"
 import MBadge from "../components/common/MBadge"
 import NotificationHandler from "../components/NotificationHandler"
@@ -24,6 +24,7 @@ interface StateProps {
   loading: boolean
   error: string
   topicLogs: TopicLogWithDatesAsDayJs[]
+  topicLogValueMap: TopicLogValueMap
   goals: Goal[]
 }
 
@@ -44,6 +45,12 @@ class Home extends React.PureComponent<Props, State> {
     this.props.goalActions.getGoalsRequest()
   }
 
+  componentDidUpdate(oldProps: Props) {
+    if (oldProps.topicLogValueMap !== this.props.topicLogValueMap) {
+      this.props.topicActions.getTopicLogsRequest()
+    }
+  }
+
   isGoalShown = (goal: Goal): boolean =>
     !goal.deleted && goal.progress < 100 && goal.status === "active"
 
@@ -58,11 +65,6 @@ class Home extends React.PureComponent<Props, State> {
         <View style={styles.main}>
           <NotificationHandler />
           <Header />
-          <View style={styles.userInfoContainer}>
-            {ownUser && (
-              <MText style={styles.userInfoText}>Hello {ownUser.name}.</MText>
-            )}
-          </View>
           <View style={styles.goalContainer}>
             <View style={styles.goalContainerHeader}>
               <MText h2 bold style={styles.lastEntriesTitle}>
@@ -86,7 +88,7 @@ class Home extends React.PureComponent<Props, State> {
                 ))}
             </View>
           </View>
-          <View style={styles.topicContainer}>
+          <View style={styles.lastEntriesContainer}>
             <MText h2 bold style={styles.lastEntriesTitle}>
               Last entries
             </MText>
@@ -132,13 +134,14 @@ class Home extends React.PureComponent<Props, State> {
 }
 
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
+  state: RootState
 ) => {
   const loading = state.user.loading
   const error = state.user.error
   const ownUser = state.user.ownUser
   const goals = state.goal.goals.filter((goal) => !goal.parent)
   const topicLogs = state.topic.topicLogs
+  const topicLogValueMap = state.topic.topicLogValueMap
 
   return {
     ownUser,
@@ -146,6 +149,7 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     error,
     goals,
     topicLogs,
+    topicLogValueMap,
   }
 }
 
@@ -172,6 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   goalContainer: {
+    marginVertical: 24,
     flex: 0,
     alignItems: "flex-start",
     justifyContent: "flex-start",
@@ -189,8 +194,9 @@ const styles = StyleSheet.create({
   goal: {
     marginBottom: 2,
   },
-  topicContainer: {
+  lastEntriesContainer: {
     flex: 0,
+    marginBottom: 20,
   },
   userInfoContainer: {
     flex: 1,
@@ -211,7 +217,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   topicLogEntryBadge: {
-    marginRight: 8
+    marginRight: 8,
   },
   lastEntriesTitle: {
     marginBottom: 8,
