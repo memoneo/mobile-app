@@ -309,12 +309,15 @@ class AddEntry extends React.PureComponent<Props, State> {
   }
 
   handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const OFFSET = 60
+
+    console.log(event.nativeEvent)
     if (this.state.showOptions) {
-      if (event.nativeEvent.contentOffset.y > 0) {
+      if (event.nativeEvent.contentOffset.y > OFFSET + styles.optionsContainer.height) {
         this.setState({ showOptions: false })
       }
     } else {
-      if (event.nativeEvent.contentOffset.y === 0) {
+      if (event.nativeEvent.contentOffset.y <= OFFSET) {
         this.setState({ showOptions: true })
       }
     }
@@ -525,6 +528,7 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: "row",
     alignItems: "center",
+    height: 40,
   },
   optionsButton: {
     height: 20,
@@ -533,6 +537,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   entryList: {
-    marginBottom: 40
-  }
+    marginBottom: 40,
+  },
 })
