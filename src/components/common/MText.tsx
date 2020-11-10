@@ -62,6 +62,7 @@ const localStyle = StyleSheet.create({
   text: {
     color: textStandardColor,
     fontFamily: "Nunito-Regular",
+    fontSize: 16,
   },
 })
 

@@ -16,6 +16,7 @@ import { formatDateType } from "../lib/format"
 import MBadge from "../components/common/MBadge"
 import NotificationHandler from "../components/NotificationHandler"
 import { GoalActions } from "../redux/goal"
+import { FlatList, ScrollView } from "react-native-gesture-handler"
 
 interface OwnProps {}
 
@@ -58,7 +59,7 @@ class Home extends React.PureComponent<Props, State> {
     const { ownUser, topicLogs, goals, navigation } = this.props
 
     const adjustedTopicLogs =
-      topicLogs.length > 10 ? topicLogs.slice(0, 10) : topicLogs
+      topicLogs.length > 50 ? topicLogs.slice(0, 50) : topicLogs
 
     return (
       <Auth>
@@ -66,7 +67,7 @@ class Home extends React.PureComponent<Props, State> {
           <NotificationHandler />
           <Header />
           <View style={styles.goalContainer}>
-            <View style={styles.goalContainerHeader}>
+            <View style={styles.homeList}>
               <MText h2 bold style={styles.lastEntriesTitle}>
                 Goals
               </MText>
@@ -78,7 +79,7 @@ class Home extends React.PureComponent<Props, State> {
                 onPress={() => navigation.navigate("Goals")}
               />
             </View>
-            <View style={styles.goalInnerContainer}>
+            <ScrollView contentContainerStyle={styles.goalInnerContainer}>
               {goals
                 .filter((goal) => this.isGoalShown(goal))
                 .map((goal) => (
@@ -86,37 +87,51 @@ class Home extends React.PureComponent<Props, State> {
                     <MBadge key={`goal-${goal.id}`} value={goal.name} />
                   </View>
                 ))}
-            </View>
+            </ScrollView>
           </View>
           <View style={styles.lastEntriesContainer}>
-            <MText h2 bold style={styles.lastEntriesTitle}>
-              Last entries
-            </MText>
-            {adjustedTopicLogs.length === 0 && <MText>No entries found.</MText>}
-            {adjustedTopicLogs.length > 0 && (
-              <View>
-                {adjustedTopicLogs.map((topicLog) => (
-                  <View
-                    key={`topicLog-${topicLog.id}`}
-                    style={styles.topicLogEntry}
-                  >
-                    <MBadge
-                      badgeStyle={styles.topicLogEntryBadge}
-                      value={`${formatDateType(topicLog.dateType)}`}
-                    />
-                    <MText
-                      onPress={() =>
-                        this.props.navigation.navigate("AddEntry", {
-                          date: topicLog.date,
-                        })
-                      }
+            <View style={styles.homeList}>
+              <MText h2 bold style={styles.lastEntriesTitle}>
+                Last entries
+              </MText>
+              <Icon
+                name="magnifying-glass"
+                type="foundation"
+                reverse
+                size={12}
+                onPress={() => navigation.navigate("Entries")}
+              />
+            </View>
+            <View style={styles.lastEntries}>
+              {adjustedTopicLogs.length === 0 && (
+                <MText>No entries found.</MText>
+              )}
+              {adjustedTopicLogs.length > 0 && (
+                <FlatList
+                  data={adjustedTopicLogs}
+                  renderItem={(topicLog) => (
+                    <View
+                      key={`topicLog-${topicLog.item.id}`}
+                      style={styles.topicLogEntry}
                     >
-                      {topicLog.date.format("D MMMM YYYY")}
-                    </MText>
-                  </View>
-                ))}
-              </View>
-            )}
+                      <MBadge
+                        badgeStyle={styles.topicLogEntryBadge}
+                        value={`${formatDateType(topicLog.item.dateType)}`}
+                      />
+                      <MText
+                        onPress={() =>
+                          this.props.navigation.navigate("AddEntry", {
+                            date: topicLog.item.date,
+                          })
+                        }
+                      >
+                        {topicLog.item.date.format("D MMMM YYYY")}
+                      </MText>
+                    </View>
+                  )}
+                />
+              )}
+            </View>
           </View>
           <View style={styles.actionContainer}>
             <Icon
@@ -176,12 +191,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   goalContainer: {
-    marginVertical: 24,
-    flex: 0,
+    marginVertical: 16,
     alignItems: "flex-start",
     justifyContent: "flex-start",
+    height: 194,
   },
-  goalContainerHeader: {
+  homeList: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -195,11 +210,14 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   lastEntriesContainer: {
-    flex: 0,
-    marginBottom: 20,
+    flex: 1,
+    marginBottom: 10,
+  },
+  lastEntries: {
+    flex: 1,
+    height: 200,
   },
   userInfoContainer: {
-    flex: 1,
     textAlign: "center",
     justifyContent: "center",
   },
@@ -209,7 +227,6 @@ const styles = StyleSheet.create({
   },
   userInfoLogo: {},
   actionContainer: {
-    flex: 1,
     alignItems: "flex-end",
   },
   topicLogEntry: {

@@ -5,18 +5,16 @@ import { NavigationInjectedProps, withNavigation } from "react-navigation"
 import { User, Goal, GoalStatus } from "memoneo-common/lib/types"
 import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
-import LinearGradient from "react-native-linear-gradient"
 import { RootState } from "../redux"
 import MText from "../components/common/MText"
 import { GoalActions } from "../redux/goal"
 import { colors, borderRadius, positiveColor } from "../lib/colors"
 import { ScrollView, TouchableHighlight } from "react-native-gesture-handler"
-import { Slider } from "react-native-elements"
+import { Icon, Slider } from "react-native-elements"
 import MButton from "../components/common/MButton"
 import { modalStyles } from "../lib/styleVars"
 import MPicker from "../components/common/MPicker"
 import { Picker } from "@react-native-community/picker"
-import MBadge from "../components/common/MBadge"
 
 interface OwnProps {}
 
@@ -102,13 +100,22 @@ class Goals extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <View style={styles.main}>
-          <View style={styles.header}>
-            <MText h2 bold>
+          <View style={styles.headerTop}>
+            <MText h2 bold style={styles.headerText}>
               Goals
             </MText>
+            <Icon
+              name="edit"
+              type="feather"
+              reverse
+              size={12}
+              onPress={() => this.props.navigation.navigate("Goal")}
+            />
+          </View>
+          <View style={styles.headerBottom}>
             <View style={styles.headerButtons}>
               <MButton
-                buttonStyle={styles.headerButtonStyle}
+                buttonStyle={StyleSheet.flatten([styles.headerButtonStyle])}
                 titleStyle={styles.headerButtonTextStyle}
                 title="Hide completed"
                 type={this.state.hideCompleted ? "solid" : "outline"}
@@ -294,14 +301,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#fff",
   },
-  header: {
+  headerTop: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+  },
+  headerBottom: {
+    marginBottom: 12,
+    justifyContent: "flex-end",
   },
   headerButtons: {
     flexDirection: "row",
+    justifyContent: "flex-end",
   },
   headerButtonStyle: {
     height: 20,
@@ -309,6 +319,9 @@ const styles = StyleSheet.create({
     padding: 2,
     borderRadius: 8,
     marginRight: 4,
+  },
+  headerText: {
+    marginRight: 12,
   },
   headerButtonTextStyle: {
     fontSize: 10,

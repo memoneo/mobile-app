@@ -124,6 +124,21 @@ const tabNavigator = createBottomTabNavigator(
         ),
       },
     },
+    Entries: {
+      screen: Goals,
+      navigationOptions: {
+        tabBarLabel: ({ focused }) => (
+          <MText style={styles.tabBarLabelStyle}>Entries</MText>
+        ),
+        tabBarIcon: ({ focused }) => (
+          <Icon
+            name="book"
+            type="feather"
+            color={focused ? focusedColor : unfocusedColor}
+          />
+        ),
+      },
+    }, 
     Goals: {
       screen: Goals,
       navigationOptions: {

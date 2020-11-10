@@ -76,6 +76,7 @@ class AddTopic extends React.Component<AddTopicProps, State> {
           Add Topic
         </MText>
         <View style={StyleSheet.flatten(containerStyles)}>
+          <MText bold>Type</MText>
           <MPicker
             selectedValue={this.state.topicType}
             onValueChange={(value: TopicType) =>

@@ -172,9 +172,6 @@ export const topicReducer = handleActions<TopicState, any>(
           return 0
         })
 
-      if (topicLogs.length > 15) {
-        topicLogs = topicLogs.slice(0, 15)
-      }
 
       return {
         ...state,

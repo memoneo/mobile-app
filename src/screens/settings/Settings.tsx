@@ -14,6 +14,7 @@ import SectionTitle from "../../components/SectionTitle"
 import Auth from "../../components/Auth"
 import SettingsPerson from "./SettingsPerson"
 import MButton from "../../components/common/MButton"
+import MText from "../../components/common/MText"
 
 interface OwnProps {}
 
@@ -46,6 +47,7 @@ class Settings extends React.PureComponent<Props, State> {
         <SafeAreaView style={styles.container}>
           <SectionTitle title="Topics" />
           <Section>
+            <MText>Customize the type of questions that organize your diary.</MText>
             <MButton
               title="Edit Topics"
               onPress={() => this.navigateTo("Topic")}
@@ -53,6 +55,7 @@ class Settings extends React.PureComponent<Props, State> {
           </Section>
           <SectionTitle title="Goals" />
           <Section>
+            <MText>Customize your goals.</MText>
             <MButton
               title="Edit Goals"
               onPress={() => this.navigateTo("Goal")}
@@ -60,6 +63,7 @@ class Settings extends React.PureComponent<Props, State> {
           </Section>
           <SectionTitle title="Selection Types" />
           <Section>
+          <MText>Customize options for your selection topics.</MText>
             <MButton
               title="Edit Selection Types"
               onPress={() => this.navigateTo("SelectionType")}
@@ -67,6 +71,7 @@ class Settings extends React.PureComponent<Props, State> {
           </Section>
           <SectionTitle title="Persons" />
           <Section>
+          <MText>Customize the persons which you can refer to in your diary.</MText>
             <MButton
               title="Edit Persons"
               onPress={() => this.navigateTo("Person")}

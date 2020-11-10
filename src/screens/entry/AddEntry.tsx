@@ -311,7 +311,6 @@ class AddEntry extends React.PureComponent<Props, State> {
   handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const OFFSET = 60
 
-    console.log(event.nativeEvent)
     if (this.state.showOptions) {
       if (event.nativeEvent.contentOffset.y > OFFSET + styles.optionsContainer.height) {
         this.setState({ showOptions: false })
