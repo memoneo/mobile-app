@@ -10,14 +10,14 @@ import Login from "../screens/Login"
 import Intro from "../screens/Intro"
 import Register from "../screens/Register"
 import { Icon } from "react-native-elements"
-import { focusedColor, unfocusedColor } from "../lib/colors"
+import { focusedColor, textStandardColor, unfocusedColor } from "../lib/colors"
 import AddEntry from "../screens/entry/AddEntry"
 import Settings from "../screens/settings/Settings"
 import EnterEncryptionKey from "../screens/key/EnterEncryptionKey"
 import MText from "./common/MText"
 import { StyleSheet } from "react-native"
 import SettingsSelectionType from "../screens/settings/SettingsSelectionType"
-import SettingsSelectionTypeItem from "../screens/settings/SettingsSelectionTypeItem"
+import SettingsSelectionTypeItemEdit from "../screens/settings/SettingsSelectionTypeItemEdit"
 import SettingsPerson from "../screens/settings/SettingsPerson"
 import EditTopics from "../screens/settings/topic/EditTopics"
 import AddTopic from "../screens/settings/topic/add/AddTopic"
@@ -25,10 +25,11 @@ import EditGoals from "../screens/settings/goal/EditGoals"
 import AddGoal from "../screens/settings/goal/add/AddGoal"
 import Goals from "../screens/Goals"
 import ErrorPage from "../screens/ErrorPage"
+import SettingsSelectionTypeItemAdd from "../screens/settings/SettingsSelectionTypeItemAdd"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
-    headerShown: true,
+    headerShown: false,
     headerStyle: {
       shadowOpacity: 0,
       shadowOffset: {
@@ -39,7 +40,8 @@ const defaultStackConfig = {
       elevation: 0,
     },
     headerTitleStyle: {
-      opacity: 0,
+      fontFamily: "Nunito-Bold",
+      color: textStandardColor,
     },
   },
 }
@@ -63,7 +65,7 @@ const NoAuthStack = createStackNavigator(
 const HomeStack = createStackNavigator(
   {
     Home: { screen: Home, navigationOptions: { headerShown: false } },
-    AddEntry: { screen: AddEntry, navigationOptions: { headerShown: true } },
+    AddEntry: { screen: AddEntry, navigationOptions: { headerShown: true, headerTitle: "Add new Entry" } },
   },
   {
     ...defaultStackConfig,
@@ -75,31 +77,35 @@ const SettingsStack = createStackNavigator(
     Main: { screen: Settings, navigationOptions: { headerShown: false } },
     SelectionType: {
       screen: SettingsSelectionType,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "" },
     },
-    SelectionTypeItem: {
-      screen: SettingsSelectionTypeItem,
-      navigationOptions: { headerShown: true },
+    SelectionTypeItemAdd: {
+      screen: SettingsSelectionTypeItemAdd,
+      navigationOptions: { headerShown: true, headerTitle: "Add Selection Type" },
+    },
+    SelectionTypeItemEdit: {
+      screen: SettingsSelectionTypeItemEdit,
+      navigationOptions: { headerShown: true, headerTitle: "Edit Selection Type" },
     },
     Person: {
       screen: SettingsPerson,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "Edit Persons" },
     },
     Topic: {
       screen: EditTopics,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "Edit Topics" },
     },
     Goal: {
       screen: EditGoals,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "Edit Goals" },
     },
     AddTopic: {
       screen: AddTopic,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "Add new Topic" },
     },
     AddGoal: {
       screen: AddGoal,
-      navigationOptions: { headerShown: true },
+      navigationOptions: { headerShown: true, headerTitle: "Add new Goal" },
     },
   },
   {

@@ -1,5 +1,5 @@
 import React from "react"
-import { SafeAreaView, StyleSheet, View } from "react-native"
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native"
 import {
   NavigationInjectedProps,
   NavigationScreenProp,
@@ -15,6 +15,8 @@ import Auth from "../../components/Auth"
 import SettingsPerson from "./SettingsPerson"
 import MButton from "../../components/common/MButton"
 import MText from "../../components/common/MText"
+import { Icon } from "react-native-elements"
+import { textStandardColor } from "../../lib/colors"
 
 interface OwnProps {}
 
@@ -45,37 +47,52 @@ class Settings extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.container}>
-          <SectionTitle title="Topics" />
+          <SectionTitle title="Entries" />
           <Section>
-            <MText>Customize the type of questions that organize your diary.</MText>
-            <MButton
-              title="Edit Topics"
+            <TouchableOpacity
               onPress={() => this.navigateTo("Topic")}
-            />
-          </Section>
-          <SectionTitle title="Goals" />
-          <Section>
-            <MText>Customize your goals.</MText>
-            <MButton
-              title="Edit Goals"
+              style={styles.settingsRow}
+            >
+              <Icon
+                name="folder"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Topics</MText>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => this.navigateTo("Goal")}
-            />
-          </Section>
-          <SectionTitle title="Selection Types" />
-          <Section>
-          <MText>Customize options for your selection topics.</MText>
-            <MButton
-              title="Edit Selection Types"
-              onPress={() => this.navigateTo("SelectionType")}
-            />
-          </Section>
-          <SectionTitle title="Persons" />
-          <Section>
-          <MText>Customize the persons which you can refer to in your diary.</MText>
-            <MButton
-              title="Edit Persons"
+              style={styles.settingsRow}
+            >
+              <Icon
+                name="wind"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Goal</MText>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => this.navigateTo("Person")}
-            />
+              style={styles.settingsRow}
+            >
+              <Icon
+                name="user"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Persons</MText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => this.navigateTo("SelectionType")}
+              style={styles.settingsRow}
+            >
+              <Icon
+                name="merge-type"
+                type="MaterialIcons"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Selection Types</MText>
+            </TouchableOpacity>
           </Section>
         </SafeAreaView>
       </Auth>
@@ -83,21 +100,18 @@ class Settings extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const authenticated = state.auth.authenticated
   return {
     authenticated,
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     authActions: bindActionCreators(AuthActions, dispatch),
   }
@@ -112,8 +126,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingTop: 10,
     backgroundColor: "#fff",
     alignItems: "stretch",
+  },
+  settingsRow: {
+    flexDirection: "row",
+    marginVertical: 4,
+  },
+  settingsIcon: {
+    marginRight: 18,
+    color: textStandardColor,
   },
 })

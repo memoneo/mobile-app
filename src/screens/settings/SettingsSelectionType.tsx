@@ -21,6 +21,7 @@ import Auth from "../../components/Auth"
 import Section from "../../components/Section"
 import SectionTitle from "../../components/SectionTitle"
 import { NavigationInjectedProps, withNavigation } from "react-navigation"
+import { focusedColor } from "../../lib/colors"
 
 interface OwnProps {}
 
@@ -43,17 +44,6 @@ interface DispatchProps {
 
 type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
-interface SelectionTypeFormProps {
-  name: string
-}
-
-const SelectionTypeSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(1)
-    .max(16)
-    .required("Name is required"),
-})
-
 interface State {}
 
 class SelectionTypeSettings extends React.PureComponent<Props, State> {
@@ -69,12 +59,6 @@ class SelectionTypeSettings extends React.PureComponent<Props, State> {
     this.props.selectionTypeActions.getSelectionTypesRequest()
   }
 
-  handleSubmit = (values: SelectionTypeFormProps, { resetForm }) => {
-    this.props.selectionTypeActions.createSelectionTypeRequest({
-      name: values.name,
-    })
-  }
-
   deleteSelectionType = (selectionType: SelectionType) => {}
 
   render(): JSX.Element {
@@ -84,7 +68,17 @@ class SelectionTypeSettings extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.container}>
-          <SectionTitle title="Selection Types" />
+          <View style={styles.headerContainer}>
+            <SectionTitle title="Selection Types" />
+            <Icon
+              name="plus"
+              type="feather"
+              size={12}
+              color={focusedColor}
+              reverse
+              onPress={() => this.props.navigation.navigate("SelectionTypeItemAdd")}
+            />
+          </View>
           <Section>
             <View style={styles.personDisplayContainer}>
               {selectionTypes.length === 0 && (
@@ -96,10 +90,11 @@ class SelectionTypeSettings extends React.PureComponent<Props, State> {
                 </View>
               )}
               <ScrollView style={styles.personDisplayContainerInner}>
-                {selectionTypes.map(selectionType => (
+                {selectionTypes.map((selectionType) => (
                   <View
                     key={`selectionType-view-${selectionType.id}`}
-                    style={styles.selectionTypeContainer}>
+                    style={styles.selectionTypeContainer}
+                  >
                     <MText>{selectionType.displayName}</MText>
                     <View style={styles.selectionTypeContainerInner}>
                       <Icon name="trash-2" type="feather" size={8} reverse />
@@ -118,17 +113,6 @@ class SelectionTypeSettings extends React.PureComponent<Props, State> {
                 ))}
               </ScrollView>
             </View>
-            <MText h4 style={styles.createNewTitle}>
-              Create new Selection Type
-            </MText>
-            <Formik<SelectionTypeFormProps>
-              initialValues={{ name: "" }}
-              onSubmit={this.handleSubmit}
-              validationSchema={SelectionTypeSchema}>
-              {formikProps => (
-                <SelectionTypeForm {...this.props} {...formikProps} />
-              )}
-            </Formik>
           </Section>
         </SafeAreaView>
       </Auth>
@@ -136,69 +120,9 @@ class SelectionTypeSettings extends React.PureComponent<Props, State> {
   }
 }
 
-class SelectionTypeForm extends React.Component<
-  Props & FormikProps<SelectionTypeFormProps>
-> {
-  componentDidUpdate(oldProps: Props) {
-    if (
-      oldProps.loadingCreate &&
-      !this.props.loadingCreate &&
-      !this.props.errorCreate
-    ) {
-      this.props.resetForm()
-    }
-  }
-
-  render(): JSX.Element {
-    const {
-      values,
-      handleBlur,
-      handleChange,
-      loadingCreate,
-      handleSubmit,
-      touched,
-      errors,
-      errorCreate,
-    } = this.props
-
-    return (
-      <View style={styles.formContainer}>
-        <View style={styles.formContainerInner}>
-          <MText style={styles.labelStyle}>Name</MText>
-          <MInput
-            style={styles.inputStyle}
-            value={values.name}
-            onBlur={handleBlur("name")}
-            onChangeText={handleChange("name")}
-          />
-          <View style={styles.buttonContainer}>
-            <MButton
-              title="Add"
-              loading={loadingCreate}
-              onPress={handleSubmit as any}
-              buttonStyle={styles.buttonButtonStyle}
-              titleStyle={styles.buttonTitleStyle}
-            />
-          </View>
-        </View>
-        {errors.name && touched.name && (
-          <MError textStyle={styles.errorText} text={errors.name} />
-        )}
-        <View style={styles.errorInfo}>
-          {errorCreate.length > 0 && (
-            <MError textStyle={styles.errorText} text={errorCreate} />
-          )}
-        </View>
-      </View>
-    )
-  }
-}
-
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const {
     loadingGet,
     errorGet,
@@ -225,10 +149,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     selectionTypeActions: bindActionCreators(SelectionTypeActions, dispatch),
   }
@@ -245,6 +168,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "white",
     alignItems: "stretch",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   formContainer: {},
   formContainerInner: {

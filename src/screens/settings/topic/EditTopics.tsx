@@ -1,5 +1,5 @@
 import * as React from "react"
-import { View, StyleSheet, SafeAreaView, Picker } from "react-native"
+import { View, StyleSheet, SafeAreaView } from "react-native"
 import {
   Topic,
   TopicLogDateType,
@@ -9,10 +9,7 @@ import { connect, MapDispatchToProps, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
 import { Audio } from "expo-av"
 import Auth from "../../../components/Auth"
-import {
-  NavigationInjectedProps,
-  withNavigation,
-} from "react-navigation"
+import { NavigationInjectedProps, withNavigation } from "react-navigation"
 
 import { UserActions } from "../../../redux/user"
 import { RootState } from "../../../redux"
@@ -30,9 +27,8 @@ import EditTopic from "./EditTopic"
 import { SelectionTypeActions } from "../../../redux/selectionType"
 import { Icon } from "react-native-elements"
 import DraggableFlatList from "react-native-draggable-flatlist"
-import {
-  TouchableOpacity,
-} from "react-native-gesture-handler"
+import { TouchableOpacity } from "react-native-gesture-handler"
+import { Picker } from "@react-native-community/picker"
 
 interface OwnProps {}
 
@@ -115,7 +111,10 @@ class EditTopics extends React.PureComponent<Props, State> {
               <MPicker
                 selectedValue={dateType}
                 enabled={false}
-                onValueChange={value => this.setState({ dateType: value })}>
+                onValueChange={(value) =>
+                  this.setState({ dateType: value as TopicLogDateType })
+                }
+              >
                 <Picker.Item label="Daily" value="daily" />
                 <Picker.Item label="Weekly" value="weekly" />
                 <Picker.Item label="Monthly" value="monthly" />
@@ -150,7 +149,7 @@ class EditTopics extends React.PureComponent<Props, State> {
           <View style={styles.listContainer}>
             <DraggableFlatList
               data={topics}
-              keyExtractor={topic => topic.id}
+              keyExtractor={(topic) => topic.id}
               onDragBegin={() => this.setState({ dragging: true })}
               onDragEnd={({ from, to, data }) =>
                 this.setState({ dragging: false }, () => {
@@ -158,13 +157,12 @@ class EditTopics extends React.PureComponent<Props, State> {
                   topicActions.changePriorityTopicRequest({
                     topic,
                     newRank: to,
-                    orderedTopics: data
+                    orderedTopics: data,
                   })
                 })
               }
               renderItem={({ item, drag, isActive }) => (
-                <TouchableOpacity
-                  onLongPress={drag}>
+                <TouchableOpacity onLongPress={drag}>
                   <EditTopic
                     key={`EditTopic-${item.id}`}
                     topic={item}
@@ -185,11 +183,9 @@ class EditTopics extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<
-  StateProps,
-  OwnProps,
-  RootState
-> = state => {
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+  state
+) => {
   const loading = state.user.loading || state.topic.loading
   const loadingTopic = state.topic.loading
   const topics = state.topic.topics
@@ -205,10 +201,9 @@ const mapStateToProps: MapStateToProps<
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-  DispatchProps,
-  OwnProps
-> = dispatch => {
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+  dispatch
+) => {
   return {
     userActions: bindActionCreators(UserActions, dispatch),
     topicActions: bindActionCreators(TopicActions, dispatch),

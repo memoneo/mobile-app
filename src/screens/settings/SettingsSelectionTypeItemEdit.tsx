@@ -50,7 +50,7 @@ interface State {
   showItems: boolean
 }
 
-class SelectionTypeItemSettings extends React.PureComponent<Props, State> {
+class SelectionTypeItemEditSettings extends React.PureComponent<Props, State> {
   formikRef = React.createRef()
   keyboardListener: EmitterSubscription
   isMounted = false
@@ -284,7 +284,7 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect<StateProps, DispatchProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
-)(withNavigation(SelectionTypeItemSettings))
+)(withNavigation(SelectionTypeItemEditSettings))
 
 const styles = StyleSheet.create({
   container: {
