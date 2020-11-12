@@ -14,7 +14,7 @@ type MPickerProps = OwnMPickerProps & PickerProps
 
 const MPicker: React.FC<MPickerProps> = ({ style, children, ...props }) => (
   <Picker
-    style={StyleSheet.flatten([style, pickerStyles.picker])}
+    style={StyleSheet.flatten([pickerStyles.picker, style])}
     itemStyle={StyleSheet.flatten([pickerStyles.item])}
     {...props}
   >
@@ -25,9 +25,11 @@ const MPicker: React.FC<MPickerProps> = ({ style, children, ...props }) => (
 const pickerStyles = StyleSheet.create({
   picker: {
     paddingVertical: 4,
+    fontFamily: "Nunito-Regular",
   },
   item: {
     backgroundColor: "black",
+    color: "red",
     fontFamily: "Nunito-Regular",
   },
 })
@@ -43,11 +45,5 @@ export const MPickerItem: React.FC<MPickerItemProps> = ({
   children,
   ...props
 }) => <Picker.Item {...props}>{children}</Picker.Item>
-
-const pickerItemStyles = StyleSheet.create({
-  item: {
-    fontFamily: "Nunito-Regular",
-  },
-})
 
 export default MPicker

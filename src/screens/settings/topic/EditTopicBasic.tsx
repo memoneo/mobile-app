@@ -37,26 +37,32 @@ function EditTopicBasic(props: Props): JSX.Element {
     <Icon name="drag-handle" type="material" />
   ) : (
     <>
-      <MText bold>Question</MText>
-      <MInput
-        style={styles.topicHeaderText}
-        key={`topic-text-${topic.id}`}
-        multiline
-        numberOfLines={2}
-        value={values.name}
-        onEndEditing={() => props.submit({ name: values.name })}
-        onChangeText={handleChange("name")}
-      />
-      <MText bold>Type</MText>
-      <MText>{formatTopicTypeName(topic.typeInfo.type)}</MText>
-      <MText bold>Optional</MText>
-      <Switch
-        value={values.optional}
-        onValueChange={() => {
-          setFieldValue("optional", !values.optional)
-          props.submit({ optional: !values.optional })
-        }}
-      />
+      <ItemRow>
+        <MText bold>Question</MText>
+        <MInput
+          style={styles.topicHeaderText}
+          key={`topic-text-${topic.id}`}
+          multiline
+          numberOfLines={2}
+          value={values.name}
+          onEndEditing={() => props.submit({ name: values.name })}
+          onChangeText={handleChange("name")}
+        />
+      </ItemRow>
+      <ItemRow>
+        <MText bold>Type</MText>
+        <MText>{formatTopicTypeName(topic.typeInfo.type)}</MText>
+      </ItemRow>
+      <ItemRow>
+        <MText bold>Optional</MText>
+        <Switch
+          value={values.optional}
+          onValueChange={() => {
+            setFieldValue("optional", !values.optional)
+            props.submit({ optional: !values.optional })
+          }}
+        />
+      </ItemRow>
       <View style={styles.iconContainer}>
         {topic.deleted && (
           <Icon
@@ -80,7 +86,14 @@ function EditTopicBasic(props: Props): JSX.Element {
   )
 }
 
+function ItemRow(props: React.PropsWithChildren<{}>): JSX.Element {
+  return <View style={styles.itemRow}>{props.children}</View>
+}
+
 export const styles = StyleSheet.create({
+  itemRow: {
+    marginBottom: 8,
+  },
   iconContainer: {
     position: "absolute",
     top: 0,

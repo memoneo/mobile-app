@@ -107,9 +107,10 @@ class EditTopics extends React.PureComponent<Props, State> {
       <Auth>
         <SafeAreaView style={styles.main}>
           <View style={styles.optionsContainer}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.optionsContainerInner}>
               <MPicker
                 selectedValue={dateType}
+                style={styles.optionsContainerPicker}
                 enabled={false}
                 onValueChange={(value) =>
                   this.setState({ dateType: value as TopicLogDateType })
@@ -243,6 +244,12 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  optionsContainerInner: {
+    flex: 1,
+  },
+  optionsContainerPicker: {
+    height: 32,
   },
   optionsButton: {
     height: 20,

@@ -7,21 +7,19 @@ import { RootState } from "../../redux"
 import { PersonActions } from "../../redux/person"
 import { Person } from "memoneo-common/lib/types"
 import { Yup } from "../../lib/reexports"
+import { Formik, FormikProps } from "formik"
 import MText from "../../components/common/MText"
+import MInput from "../../components/common/MInput"
+import MError from "../../components/common/MError"
+import MButton from "../../components/common/MButton"
 import { fontSizeSmall } from "../../lib/styleVars"
-import { Icon } from "react-native-elements"
-import { formatPersonName } from "../../lib/format"
-import Section from "../../components/Section"
-import SectionTitle from "../../components/SectionTitle"
 import Auth from "../../components/Auth"
-import { focusedColor } from "../../lib/colors"
 
 interface OwnProps {}
 
 interface StateProps {
-  loadingGetDelete: boolean
-  errorGetDelete: string
-  persons: Person[]
+  loadingCreate: boolean
+  errorCreate: string
 }
 
 interface DispatchProps {
@@ -42,7 +40,7 @@ const PersonSchema = Yup.object().shape({
 
 interface State {}
 
-class PersonSettings extends React.PureComponent<Props, State> {
+class PersonSettingsAdd extends React.PureComponent<Props, State> {
   formikRef = React.createRef()
 
   constructor(props: Props) {
@@ -53,6 +51,16 @@ class PersonSettings extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     this.props.personActions.getPersonsRequest()
+  }
+
+  componentDidUpdate(oldProps: Props) {
+    if (
+      oldProps.loadingCreate &&
+      !this.props.loadingCreate &&
+      !this.props.errorCreate
+    ) {
+      this.props.navigation.navigate("Person")
+    }
   }
 
   handleSubmit = (values: FormProps, { resetForm }) => {
@@ -67,47 +75,78 @@ class PersonSettings extends React.PureComponent<Props, State> {
   }
 
   render(): JSX.Element {
-    const { persons } = this.props
-
     return (
       <Auth>
         <SafeAreaView style={styles.container}>
-          <View style={styles.headerContainer}>
-            <SectionTitle title="Persons" />
-            <Icon
-              name="plus"
-              type="feather"
-              size={12}
-              color={focusedColor}
-              reverse
-              onPress={() =>
-                this.props.navigation.navigate("PersonAdd")
-              }
-            />
-          </View>
-          <Section>
-            {persons.length === 0 && (
-              <View>
-                <MText>
-                  Configure Persons for use in the respective Memoneo entries
-                  regarding Persons. Right now there are none..
-                </MText>
-              </View>
+          <Formik<FormProps>
+            initialValues={{ name: "", surname: "" }}
+            onSubmit={this.handleSubmit}
+            validationSchema={PersonSchema}
+          >
+            {(formikProps) => (
+              <AddPersonForm {...this.props} {...formikProps} />
             )}
-            <View style={styles.personDisplayContainerInner}>
-              {persons.map((person) => (
-                <View
-                  key={`person-view-${person.id}`}
-                  style={styles.personInfoContainer}
-                >
-                  <MText>{formatPersonName(person)}</MText>
-                  <Icon name="trash-2" type="feather" size={8} reverse />
-                </View>
-              ))}
-            </View>
-          </Section>
+          </Formik>
         </SafeAreaView>
       </Auth>
+    )
+  }
+}
+
+type AddPersonFormProps = Props & FormikProps<FormProps>
+
+class AddPersonForm extends React.Component<AddPersonFormProps> {
+  render(): JSX.Element {
+    const {
+      values,
+      handleBlur,
+      handleChange,
+      loadingCreate,
+      handleSubmit,
+      touched,
+      errors,
+      errorCreate,
+    } = this.props
+
+    return (
+      <View style={styles.formContainer}>
+        <View style={styles.formContainerInner}>
+          <MText bold style={styles.labelStyle}>Name</MText>
+          <MInput
+            style={styles.inputStyle}
+            value={values.name}
+            onBlur={handleBlur("name")}
+            onChangeText={handleChange("name")}
+          />
+          <MText bold style={styles.labelStyle}>Surname</MText>
+          <MInput
+            style={styles.inputStyle}
+            value={values.surname}
+            onBlur={handleBlur("surname")}
+            onChangeText={handleChange("surname")}
+          />
+          <View style={styles.buttonContainer}>
+            <MButton
+              title="Add"
+              loading={loadingCreate}
+              onPress={handleSubmit as any}
+              buttonStyle={styles.buttonButtonStyle}
+              titleStyle={styles.buttonTitleStyle}
+            />
+          </View>
+        </View>
+        {errors.name && touched.name && (
+          <MError textStyle={styles.errorText} text={errors.name} />
+        )}
+        {errors.surname && touched.surname && (
+          <MError textStyle={styles.errorText} text={errors.surname} />
+        )}
+        <View style={styles.errorInfo}>
+          {errorCreate.length > 0 && (
+            <MError textStyle={styles.errorText} text={errorCreate} />
+          )}
+        </View>
+      </View>
     )
   }
 }
@@ -115,12 +154,14 @@ class PersonSettings extends React.PureComponent<Props, State> {
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   state
 ) => {
-  const { loadingGetDelete, errorGetDelete, persons } = state.person
+  const {
+    loadingCreate,
+    errorCreate,
+  } = state.person
 
   return {
-    persons,
-    loadingGetDelete,
-    errorGetDelete,
+    loadingCreate,
+    errorCreate,
   }
 }
 
@@ -135,7 +176,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 export default withNavigation(connect<StateProps, DispatchProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
-)(PersonSettings))
+)(PersonSettingsAdd))
 
 const styles = StyleSheet.create({
   container: {
@@ -144,14 +185,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     alignItems: "stretch",
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
   formContainer: {},
   formContainerInner: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   errorInfo: {},
   errorText: {
@@ -164,23 +199,22 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {},
   buttonButtonStyle: {
-    height: 20,
-    width: 50,
+    width: 100,
+    height: 30,
     paddingHorizontal: 0,
     paddingVertical: 0,
   },
   labelStyle: {
-    fontSize: fontSizeSmall,
     height: 20,
-    marginRight: 8,
+    marginBottom: 8,
     textAlignVertical: "center",
   },
   inputStyle: {
     fontSize: fontSizeSmall,
     textAlignVertical: "top",
     height: 20,
-    width: 80,
-    marginRight: 16,
+    width: 200,
+    marginBottom: 16,
   },
   buttonTitleStyle: {
     paddingVertical: 12,

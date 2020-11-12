@@ -26,6 +26,7 @@ import AddGoal from "../screens/settings/goal/add/AddGoal"
 import Goals from "../screens/Goals"
 import ErrorPage from "../screens/ErrorPage"
 import SettingsSelectionTypeItemAdd from "../screens/settings/SettingsSelectionTypeItemAdd"
+import SettingsPersonAdd from "../screens/settings/SettingsPersonAdd"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -74,7 +75,7 @@ const HomeStack = createStackNavigator(
 )
 const SettingsStack = createStackNavigator(
   {
-    Main: { screen: Settings, navigationOptions: { headerShown: false } },
+    Main: { screen: Settings, navigationOptions: { headerShown: true } },
     SelectionType: {
       screen: SettingsSelectionType,
       navigationOptions: { headerShown: true, headerTitle: "" },
@@ -89,15 +90,19 @@ const SettingsStack = createStackNavigator(
     },
     Person: {
       screen: SettingsPerson,
-      navigationOptions: { headerShown: true, headerTitle: "Edit Persons" },
+      navigationOptions: { headerShown: true, headerTitle: "" },
+    },
+    PersonAdd: {
+      screen: SettingsPersonAdd,
+      navigationOptions: { headerShown: true, headerTitle: "Add Person" },
     },
     Topic: {
       screen: EditTopics,
-      navigationOptions: { headerShown: true, headerTitle: "Edit Topics" },
+      navigationOptions: { headerShown: true, headerTitle: "" },
     },
     Goal: {
       screen: EditGoals,
-      navigationOptions: { headerShown: true, headerTitle: "Edit Goals" },
+      navigationOptions: { headerShown: true, headerTitle: "" },
     },
     AddTopic: {
       screen: AddTopic,
