@@ -2,10 +2,11 @@ import React from "react"
 
 import { Text, TextProps } from "react-native-elements"
 import { StyleSheet, View } from "react-native"
-import { textStandardColor } from "../../lib/colors"
+import { focusedTextColor, textStandardColor } from "../../lib/colors"
 
 interface OwnProps {
   bold?: boolean
+  focus?: boolean
   wrapInView?: boolean
   includeFontPadding?: boolean
 }
@@ -20,6 +21,7 @@ const MText: React.FC<Props> = ({
   h3,
   h4,
   bold,
+  focus,
   wrapInView,
   ...rest
 }) => {
@@ -37,6 +39,10 @@ const MText: React.FC<Props> = ({
 
   if (bold) {
     dynamicStyle.fontFamily = "Nunito-Bold"
+  }
+
+  if (focus) {
+    dynamicStyle.color = focusedTextColor
   }
 
   return wrapInView ? (

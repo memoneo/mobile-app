@@ -6736,6 +6736,11 @@ react-native-elements@^2.0.4:
     react-native-ratings "^7.2.0"
     react-native-status-bar-height "^2.5.0"
 
+react-native-email-link@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/react-native-email-link/-/react-native-email-link-1.10.0.tgz#e724a528d49c8f4d8525615501dc4c791ae1026b"
+  integrity sha512-QPbG0pbI6sfqaQJt5RoOrRtpbxEO3iB/UX2354qMqPqbPHk1ijxgAQj2wGpnRZqOKI62PqfCrub+0NUmCgZ3bg==
+
 react-native-flipper@^0.34.0:
   version "0.34.0"
   resolved "https://registry.yarnpkg.com/react-native-flipper/-/react-native-flipper-0.34.0.tgz#7df1f38ba5d97a9321125fe0fccbe47d99e6fa1d"

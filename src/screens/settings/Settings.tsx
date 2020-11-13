@@ -5,6 +5,7 @@ import {
   NavigationScreenProp,
   withNavigation,
 } from "react-navigation"
+import { openInbox } from "react-native-email-link"
 import { connect, MapStateToProps, MapDispatchToProps } from "react-redux"
 import { AuthActions } from "../../redux/auth"
 import { bindActionCreators } from "redux"
@@ -17,6 +18,7 @@ import MButton from "../../components/common/MButton"
 import MText from "../../components/common/MText"
 import { Icon } from "react-native-elements"
 import { textStandardColor } from "../../lib/colors"
+import { HELP_MAIL_ADDRESS } from "../../../config"
 
 interface OwnProps {}
 
@@ -94,6 +96,19 @@ class Settings extends React.PureComponent<Props, State> {
               <MText>Selection Types</MText>
             </TouchableOpacity>
           </Section>
+          <SectionTitle title="Help" />
+          <Section>
+            <View style={styles.helpMailText}>
+              <MText>
+                <MText>
+                  If you have any suggestions, need explanations, want to insult
+                  me etc., you can contact me via mail at{" "}
+                </MText>
+                <MText focus onPress={() => openInbox()}>{HELP_MAIL_ADDRESS}</MText>
+                <MText>.</MText>
+              </MText>
+            </View>
+          </Section>
         </SafeAreaView>
       </Auth>
     )
@@ -136,5 +151,7 @@ const styles = StyleSheet.create({
   settingsIcon: {
     marginRight: 18,
     color: textStandardColor,
+  },
+  helpMailText: {
   },
 })
