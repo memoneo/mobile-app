@@ -1,6 +1,6 @@
 import { Dayjs } from "dayjs"
 import React from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { getMonthDays, getDayNames, DayType } from "../../lib/month"
 import Day from "./Day"
 import Weekdays from "./Weekdays"
@@ -31,9 +31,9 @@ export default class Month extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        {showWeekdays && <Weekdays />}
+        {showWeekdays && <Weekdays dayNames={dayNames} />}
         {weeks.map((week, idx) => (
-          <View key={`week-${idx}`}>
+          <View key={`week-${idx}`} style={styles.weeks}>
             {week.map((day) => (
               <Day day={day} />
             ))}
@@ -43,3 +43,9 @@ export default class Month extends React.Component<Props, State> {
     )
   }
 }
+
+const styles = StyleSheet.create({
+  weeks: {
+    flexDirection: "row"
+  }
+})

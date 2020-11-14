@@ -27,6 +27,7 @@ import Goals from "../screens/Goals"
 import ErrorPage from "../screens/ErrorPage"
 import SettingsSelectionTypeItemAdd from "../screens/settings/SettingsSelectionTypeItemAdd"
 import SettingsPersonAdd from "../screens/settings/SettingsPersonAdd"
+import Entries from "../screens/entry/Entries"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -66,7 +67,10 @@ const NoAuthStack = createStackNavigator(
 const HomeStack = createStackNavigator(
   {
     Home: { screen: Home, navigationOptions: { headerShown: false } },
-    AddEntry: { screen: AddEntry, navigationOptions: { headerShown: true, headerTitle: "Add new Entry" } },
+    AddEntry: {
+      screen: AddEntry,
+      navigationOptions: { headerShown: true, headerTitle: "Add new Entry" },
+    },
   },
   {
     ...defaultStackConfig,
@@ -82,11 +86,17 @@ const SettingsStack = createStackNavigator(
     },
     SelectionTypeItemAdd: {
       screen: SettingsSelectionTypeItemAdd,
-      navigationOptions: { headerShown: true, headerTitle: "Add Selection Type" },
+      navigationOptions: {
+        headerShown: true,
+        headerTitle: "Add Selection Type",
+      },
     },
     SelectionTypeItemEdit: {
       screen: SettingsSelectionTypeItemEdit,
-      navigationOptions: { headerShown: true, headerTitle: "Edit Selection Type" },
+      navigationOptions: {
+        headerShown: true,
+        headerTitle: "Edit Selection Type",
+      },
     },
     Person: {
       screen: SettingsPerson,
@@ -136,7 +146,7 @@ const tabNavigator = createBottomTabNavigator(
       },
     },
     Entries: {
-      screen: Goals,
+      screen: Entries,
       navigationOptions: {
         tabBarLabel: ({ focused }) => (
           <MText style={styles.tabBarLabelStyle}>Entries</MText>
@@ -149,7 +159,7 @@ const tabNavigator = createBottomTabNavigator(
           />
         ),
       },
-    }, 
+    },
     Goals: {
       screen: Goals,
       navigationOptions: {

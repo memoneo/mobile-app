@@ -67,10 +67,10 @@ export function getMonthDays(
   minDate?: Dayjs,
   maxDate?: Dayjs
 ): DayType[] {
-  minDate.hour(0)
-  maxDate.hour(0)
-  startDate.hour(0)
-  endDate.hour(0)
+  minDate?.hour(0)
+  maxDate?.hour(0)
+  startDate?.hour(0)
+  endDate?.hour(0)
 
   const firstMonthDay = dayjs(new Date(year, month, 1))
   const lastMonthDay = dayjs(new Date(year, month + 1, 0))

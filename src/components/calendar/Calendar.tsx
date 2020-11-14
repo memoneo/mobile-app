@@ -1,17 +1,18 @@
-import dayjs from "dayjs"
+import dayjs, { Dayjs } from "dayjs"
 import React from "react"
 import { FlatList, ListRenderItemInfo } from "react-native"
+import MonthWrapper from "./MonthWrapper"
 
 interface Props {}
 
 interface State {
-  firstMonthToRender: Date
+  firstMonthToRender: Dayjs
   months: any[]
   firstViewableIndex: number
   lastViewableIndex: number
   initialScrollIndex: number
-  startDate?: Date
-  endDate?: Date
+  startDate?: Dayjs
+  endDate?: Dayjs
 }
 
 const NUMBER_OF_MONTHS = 12
@@ -27,7 +28,7 @@ const VIEWABILITY_CONFIG = {
 
 export default class Calendar extends React.Component<Props, State> {
   state = {
-    firstMonthToRender: new Date(),
+    firstMonthToRender: dayjs(new Date()),
     months: [],
     initialScrollIndex: 0,
     startDate: undefined,
@@ -49,11 +50,15 @@ export default class Calendar extends React.Component<Props, State> {
 
   keyExtractor = (_: any, idx: number): string => String(idx)
 
-  renderMonth({ index }: ListRenderItemInfo<any>): JSX.Element {
+  componentDidMount() {
+    this.setState({ months: [0] })
+  }
+
+  renderMonth = ({ index }: ListRenderItemInfo<any>): JSX.Element => {
     const { firstMonthToRender } = this.state
     const month = dayjs(firstMonthToRender).add(index, "month")
 
-    return null
+    return <MonthWrapper month={month.month()} year={month.year()} />
   }
 
   render(): JSX.Element {
