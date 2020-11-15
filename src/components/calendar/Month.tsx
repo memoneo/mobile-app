@@ -1,13 +1,25 @@
 import { Dayjs } from "dayjs"
 import React from "react"
 import { StyleSheet, View } from "react-native"
-import { getMonthDays, getDayNames, DayType } from "../../lib/month"
+import { Icon } from "react-native-elements"
+import {
+  primaryColor,
+  secondaryColor,
+  textStandardColor,
+  thirdColor,
+} from "../../lib/colors"
+import {
+  getMonthDays,
+  getDayNames,
+  DayType,
+  getMonthNames,
+} from "../../lib/month"
+import MText from "../common/MText"
 import Day from "./Day"
 import Weekdays from "./Weekdays"
 
 interface Props {
-  month: number
-  year: number
+  month: Dayjs
   onPress?: () => void
   showWeekdays?: boolean
   firstDayMonday?: boolean
@@ -17,9 +29,11 @@ interface State {}
 
 export default class Month extends React.Component<Props, State> {
   render(): JSX.Element {
-    const { month, year, firstDayMonday = true } = this.props
+    const { month, firstDayMonday = true } = this.props
 
-    const days = getMonthDays(month, year, false, [], false)
+    const monthNames = getMonthNames()
+
+    const days = getMonthDays(month.month(), month.year(), false, [], false)
     const dayNames = getDayNames(firstDayMonday)
 
     const weeks: DayType[][] = []
@@ -30,22 +44,66 @@ export default class Month extends React.Component<Props, State> {
     }
 
     return (
-      <React.Fragment>
-        {showWeekdays && <Weekdays dayNames={dayNames} />}
-        {weeks.map((week, idx) => (
-          <View key={`week-${idx}`} style={styles.weeks}>
-            {week.map((day) => (
-              <Day day={day} />
-            ))}
+      <View style={styles.container}>
+        <View style={styles.monthNameContainer}>
+          <Icon
+            name="chevron-left"
+            type="feather"
+            color={thirdColor}
+            style={styles.monthNameIcon}
+          />
+          <View style={styles.monthName}>
+            <MText bold style={styles.monthNameText}>
+              {month.format("MMMM, YYYY")}
+            </MText>
           </View>
-        ))}
-      </React.Fragment>
+          <Icon
+            name="chevron-right"
+            type="feather"
+            color={thirdColor}
+            style={styles.monthNameIcon}
+          />
+        </View>
+        {showWeekdays && <Weekdays days={dayNames} />}
+        <View style={styles.weeksContainer}>
+          {weeks.map((week, idx) => (
+            <View key={`week-${idx}`} style={styles.weeks}>
+              {week.map((day) => (
+                <Day day={day} />
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  container: {},
   weeks: {
-    flexDirection: "row"
-  }
+    flexDirection: "row",
+  },
+  monthNameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  monthNameText: {
+    textAlign: "center",
+    color: "white",
+  },
+  monthNameIcon: {
+    marginHorizontal: 12,
+  },
+  monthName: {
+    backgroundColor: secondaryColor,
+    color: textStandardColor,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    width: 140,
+    borderRadius: 100,
+  },
+  weeksContainer: {},
 })

@@ -2,7 +2,7 @@ import React from "react"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import MText from "../common/MText"
 import { DayType } from "../../lib/month"
-import { StyleSheet } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { borderRadius, secondaryColor, thirdColor } from "../../lib/colors"
 
 interface Props {
@@ -12,20 +12,29 @@ interface Props {
 export default class Day extends React.Component<Props> {
   render(): JSX.Element {
     const { day } = this.props
-
     return (
-      <TouchableOpacity style={styles.day}>
-        <MText>{day.date.format("DD")}</MText>
-      </TouchableOpacity>
+      <View style={styles.day}>
+        <TouchableOpacity style={styles.dayInner}>
+          <MText style={styles.dayText} allowFontScaling={false}>
+            {day.date.format("D")}
+          </MText>
+        </TouchableOpacity>
+      </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
   day: {
-    padding: 12,
-    margin: 4,
-    backgroundColor: thirdColor,
-    borderRadius: borderRadius,
+    flex: 1,
+    alignItems: "center",
+  },
+  dayInner: {
+    padding: 8,
+    marginVertical: 4,
+  },
+  dayText: {
+    fontSize: 10,
+    textAlign: "center",
   },
 })

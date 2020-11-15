@@ -1,7 +1,9 @@
 import dayjs, { Dayjs } from "dayjs"
 import React from "react"
-import { FlatList, ListRenderItemInfo } from "react-native"
-import MonthWrapper from "./MonthWrapper"
+import { StyleSheet, View } from "react-native"
+import Line from "../common/Line"
+import MText from "../common/MText"
+import Month from "./Month"
 
 interface Props {}
 
@@ -37,40 +39,23 @@ export default class Calendar extends React.Component<Props, State> {
     lastViewableIndex: INITIAL_LIST_SIZE + VIEWABLE_RANGE_OFFSET,
   }
 
-  private listReference?: FlatList<any> | null | undefined
-
-  setReference = (ref: any) => {
-    if (ref) {
-      this.listReference = ref
-      //   if (this.props.calendarListRef) {
-      //     this.props.calendarListRef(ref)
-      //   }
-    }
-  }
-
-  keyExtractor = (_: any, idx: number): string => String(idx)
-
   componentDidMount() {
     this.setState({ months: [0] })
   }
 
-  renderMonth = ({ index }: ListRenderItemInfo<any>): JSX.Element => {
-    const { firstMonthToRender } = this.state
-    const month = dayjs(firstMonthToRender).add(index, "month")
-
-    return <MonthWrapper month={month.month()} year={month.year()} />
-  }
-
   render(): JSX.Element {
+    const { firstMonthToRender } = this.state
+    const month = dayjs(firstMonthToRender).add(0, "month")
+
     return (
-      <FlatList
-        data={this.state.months}
-        renderItem={this.renderMonth}
-        keyExtractor={this.keyExtractor}
-        ref={this.setReference}
-        removeClippedSubviews
-        initialScrollIndex={this.state.initialScrollIndex}
-      />
+      <View style={styles.container}>
+        <Month month={month} />
+        <Line style={{ width: "95%", marginTop: 24 }} />
+      </View>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  container: {},
+})
