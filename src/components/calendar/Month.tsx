@@ -1,4 +1,5 @@
 import { Dayjs } from "dayjs"
+import { TopicLogWithDatesAsDayJs } from "memoneo-common/lib/types"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import { Icon } from "react-native-elements"
@@ -15,11 +16,13 @@ import {
   getMonthNames,
 } from "../../lib/month"
 import MText from "../common/MText"
+import { CalendarTopicLogMap } from "./Calendar"
 import Day from "./Day"
 import Weekdays from "./Weekdays"
 
 interface Props {
   month: Dayjs
+  topicLogMap: CalendarTopicLogMap
   onPress?: () => void
   showWeekdays?: boolean
   firstDayMonday?: boolean
@@ -29,9 +32,7 @@ interface State {}
 
 export default class Month extends React.Component<Props, State> {
   render(): JSX.Element {
-    const { month, firstDayMonday = true } = this.props
-
-    const monthNames = getMonthNames()
+    const { month, firstDayMonday = true, topicLogMap } = this.props
 
     const days = getMonthDays(month.month(), month.year(), false, [], false)
     const dayNames = getDayNames(firstDayMonday)
@@ -68,9 +69,16 @@ export default class Month extends React.Component<Props, State> {
         <View style={styles.weeksContainer}>
           {weeks.map((week, idx) => (
             <View key={`week-${idx}`} style={styles.weeks}>
-              {week.map((day) => (
-                <Day day={day} />
-              ))}
+              {week.map((day) => {
+                return (
+                  <Day
+                    key={`day-${day.id}`}
+                    day={day}
+                    month={month}
+                    topicLog={topicLogMap[day.date.month()]?.[day.date.date()]}
+                  />
+                )
+              })}
             </View>
           ))}
         </View>
