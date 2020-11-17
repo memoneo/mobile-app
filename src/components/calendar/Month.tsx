@@ -26,13 +26,21 @@ interface Props {
   onPress?: () => void
   showWeekdays?: boolean
   firstDayMonday?: boolean
+  focusedDay: Dayjs
+  focusDay: (day: Dayjs) => void
 }
 
 interface State {}
 
 export default class Month extends React.Component<Props, State> {
   render(): JSX.Element {
-    const { month, firstDayMonday = true, topicLogMap } = this.props
+    const {
+      month,
+      firstDayMonday = true,
+      topicLogMap,
+      focusedDay,
+      focusDay,
+    } = this.props
 
     const days = getMonthDays(month.month(), month.year(), false, [], false)
     const dayNames = getDayNames(firstDayMonday)
@@ -75,6 +83,8 @@ export default class Month extends React.Component<Props, State> {
                     key={`day-${day.id}`}
                     day={day}
                     month={month}
+                    onPress={() => focusDay(day.date)}
+                    isFocused={day.date.isSame(focusedDay, "day")}
                     topicLog={topicLogMap[day.date.month()]?.[day.date.date()]}
                   />
                 )
