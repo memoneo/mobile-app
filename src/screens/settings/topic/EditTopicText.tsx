@@ -1,39 +1,38 @@
 import * as React from "react"
 import { StyleSheet } from "react-native"
-import { TopicLogValueTextSimple } from "memoneo-common/lib/types"
-import { FormikProps, Formik } from "formik"
-import { Yup } from "../../../lib/reexports"
+import { Formik } from "formik"
 import { EditTopicInnerSubProps } from "./EditTopic"
-import EditTopicBasic from "./EditTopicBasic"
+import EditBasicFields, {
+  AddButton,
+  BasicEditSchema,
+  BasicFormValues,
+  getBasicInitialValues,
+} from "./EditBasicFields"
+import MText from "../../../components/common/MText"
 
-interface FormValues {
-  name: string
-  optional: boolean
-}
+interface FormValues extends BasicFormValues {}
 
 interface Props extends EditTopicInnerSubProps {}
 
-interface FormProps extends FormikProps<FormValues> {
-  value?: TopicLogValueTextSimple
-}
-
-const EditTopicTextSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(1)
-    .max(16)
-    .required("Name is required"),
-  optional: Yup.boolean(),
-})
+const EditTopicTextSchema = BasicEditSchema.clone()
 
 function EditTopicText(props: Props): JSX.Element {
   return (
     <Formik<FormValues>
-      initialValues={{ name: props.topic.name, optional: props.topic.optional }}
-      onSubmit={() => {}}
+      initialValues={{
+        ...getBasicInitialValues(props.topic),
+      }}
+      onSubmit={props.submitCreateTopicFromValues}
       validationSchema={EditTopicTextSchema}>
       {formikProps => (
         <>
-          <EditTopicBasic {...props} {...formikProps} />
+          <EditBasicFields {...props} {...formikProps} />
+          <MText>
+            {formikProps.errors["name"]}
+            {formikProps.errors["hasVoice"]}
+            {formikProps.errors["optional"]}
+          </MText>
+          {props.mode === "add" && <AddButton {...formikProps} />}
         </>
       )}
     </Formik>

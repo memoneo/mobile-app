@@ -45,7 +45,8 @@ import { Dayjs } from "dayjs"
 import { GoalActions } from "../../redux/goal"
 import { Picker } from "@react-native-community/picker"
 import AddEntryInner from "./AddEntryInner"
-import content from "*.svg"
+
+import { RecordContext } from "./RecordBar"
 
 interface OwnProps {}
 
@@ -251,7 +252,7 @@ class AddEntry extends React.PureComponent<Props, State> {
       dayjs(date).format("D-MMMM-YYYY")
     )
     await this.sound.loadAsync({ uri: path + `/${topic.id}.m4a` })
-    this.sound.setOnPlaybackStatusUpdate((status) => {
+    this.sound.setOnPlaybackStatusUpdate(status => {
       if (status.isLoaded) {
         if (status.didJustFinish) {
           this.stopPlayRecording()
@@ -312,7 +313,10 @@ class AddEntry extends React.PureComponent<Props, State> {
     const OFFSET = 60
 
     if (this.state.showOptions) {
-      if (event.nativeEvent.contentOffset.y > OFFSET + styles.optionsContainer.height) {
+      if (
+        event.nativeEvent.contentOffset.y >
+        OFFSET + styles.optionsContainer.height
+      ) {
         this.setState({ showOptions: false })
       }
     } else {
@@ -348,104 +352,112 @@ class AddEntry extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.main}>
-          <View>
-            {this.state.showOptions && (
-              <View style={styles.optionsContainer}>
-                <View style={{ flex: 1 }}>
-                  <MPicker
-                    selectedValue={dateType}
-                    enabled={false}
-                    onValueChange={(value) =>
-                      this.setState({ dateType: value as TopicLogDateType })
-                    }
-                  >
-                    <Picker.Item label="Daily" value="daily" />
-                    <Picker.Item label="Weekly" value="weekly" />
-                    <Picker.Item label="Monthly" value="monthly" />
-                    <Picker.Item label="Yearly" value="yearly" />
-                  </MPicker>
-                </View>
-                {dateType === "daily" && (
-                  <>
-                    <View>
-                      <MButton
-                        buttonStyle={styles.optionsButton}
-                        titleStyle={styles.optionsButtonTitle}
-                        onPress={() => this.setState({ showDatePicker: true })}
-                        title="Select day"
-                      />
-                      {showDatePicker && (
-                        <DateTimePicker
-                          value={date}
-                          mode="date"
-                          display="default"
-                          onChange={this.setDate}
+          <RecordContext.Provider
+            value={{
+              recording,
+              playing,
+              topicRecordMap,
+              canRecord: this.canRecord,
+              startRecording: this.startRecording,
+              playRecording: this.playRecording,
+              stopRecording: this.stopRecording,
+              stopPlayRecording: this.stopPlayRecording,
+            }}>
+            <View>
+              {this.state.showOptions && (
+                <View style={styles.optionsContainer}>
+                  <View style={{ flex: 1 }}>
+                    <MPicker
+                      selectedValue={dateType}
+                      enabled={false}
+                      onValueChange={value =>
+                        this.setState({ dateType: value as TopicLogDateType })
+                      }>
+                      <Picker.Item label="Daily" value="daily" />
+                      <Picker.Item label="Weekly" value="weekly" />
+                      <Picker.Item label="Monthly" value="monthly" />
+                      <Picker.Item label="Yearly" value="yearly" />
+                    </MPicker>
+                  </View>
+                  {dateType === "daily" && (
+                    <>
+                      <View>
+                        <MButton
+                          buttonStyle={styles.optionsButton}
+                          titleStyle={styles.optionsButtonTitle}
+                          onPress={() =>
+                            this.setState({ showDatePicker: true })
+                          }
+                          title="Select day"
                         />
-                      )}
-                    </View>
-                  </>
-                )}
-              </View>
-            )}
-            {dateType === "daily" && (
-              <View>
-                <MText h3 bold>
-                  {dayjs(date).format("D MMMM YYYY")}
-                </MText>
-              </View>
-            )}
-            {!hasPermissions && (
-              <View style={styles.noPermissionsContainer}>
-                <MText>Please enable audio for Memoneo to proceed.</MText>
-              </View>
-            )}
-            {recordingError.length > 0 && (
-              <View style={styles.noPermissionsContainer}>
-                <MError text={recordingError} />
-              </View>
-            )}
-            {topicError.length > 0 && (
-              <View style={styles.noPermissionsContainer}>
-                <MError text={topicError} />
-              </View>
-            )}
-            {hasPermissions && hasTopicLog && (
-              <FlatList
-                data={topics}
-                onScroll={this.handleScroll}
-                style={styles.entryList}
-                renderItem={(t) => (
-                  <AddEntryInner
-                    topic={t.item}
-                    topicActions={topicActions}
-                    goals={goals}
-                    persons={persons}
-                    topicRecordMap={topicRecordMap}
-                    topicLogValueMap={topicLogValueMap}
-                    date={date}
-                    dateType={dateType}
-                    recording={recording}
-                    playing={playing}
-                    topicLog={topicLog}
-                    startRecording={this.startRecording}
-                    stopRecording={this.stopRecording}
-                    playRecording={this.playRecording}
-                    stopPlayRecording={this.stopPlayRecording}
-                    canRecord={this.canRecord}
-                  />
-                )}
-              />
-            )}
-          </View>
+                        {showDatePicker && (
+                          <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={this.setDate}
+                          />
+                        )}
+                      </View>
+                    </>
+                  )}
+                </View>
+              )}
+              {dateType === "daily" && (
+                <View>
+                  <MText h3 bold>
+                    {dayjs(date).format("D MMMM YYYY")}
+                  </MText>
+                </View>
+              )}
+              {!hasPermissions && (
+                <View style={styles.noPermissionsContainer}>
+                  <MText>Please enable audio for Memoneo to proceed.</MText>
+                </View>
+              )}
+              {recordingError.length > 0 && (
+                <View style={styles.noPermissionsContainer}>
+                  <MError text={recordingError} />
+                </View>
+              )}
+              {topicError.length > 0 && (
+                <View style={styles.noPermissionsContainer}>
+                  <MError text={topicError} />
+                </View>
+              )}
+              {hasPermissions && hasTopicLog && (
+                <FlatList
+                  data={topics}
+                  onScroll={this.handleScroll}
+                  style={styles.entryList}
+                  renderItem={t => (
+                    <AddEntryInner
+                      topic={t.item}
+                      topicActions={topicActions}
+                      goals={goals}
+                      persons={persons}
+                      topicRecordMap={topicRecordMap}
+                      topicLogValueMap={topicLogValueMap}
+                      date={date}
+                      dateType={dateType}
+                      topicLog={topicLog}
+                    />
+                  )}
+                />
+              )}
+            </View>
+          </RecordContext.Provider>
         </SafeAreaView>
       </Auth>
     )
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const loading =
     state.user.loading || state.recording.loading || state.topic.loading
   const loadingRecording = state.recording.loading
@@ -453,7 +465,7 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   const loadingTopic = state.topic.loading
   const loadingSaveValue = state.topic.loadingSaveValue
 
-  const topics = state.topic.topics.filter((topic) => !topic.deleted)
+  const topics = state.topic.topics.filter(topic => !topic.deleted)
   const topicError = state.topic.error
 
   const goals = state.goal.goals
@@ -485,9 +497,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     userActions: bindActionCreators(UserActions, dispatch),
     recordingActions: bindActionCreators(RecordingActions, dispatch),

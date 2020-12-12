@@ -166,12 +166,12 @@ class EditTopics extends React.PureComponent<Props, State> {
                 <TouchableOpacity onLongPress={drag}>
                   <EditTopic
                     key={`EditTopic-${item.id}`}
+                    mode="edit"
                     topic={item}
                     drag={drag}
                     isDragging={this.state.dragging}
                     isDraggingSelf={isActive}
                     topicActions={topicActions}
-                    date={date}
                     dateType={dateType}
                   />
                 </TouchableOpacity>

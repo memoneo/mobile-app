@@ -1,41 +1,33 @@
 import * as React from "react"
-import { View, StyleSheet } from "react-native"
-import { TopicLogValueTextSimple } from "memoneo-common/lib/types"
-import { FormikProps, Formik } from "formik"
+import { StyleSheet } from "react-native"
+import { Formik } from "formik"
 import { EditTopicInnerSubProps } from "./EditTopic"
-import { Yup } from "../../../lib/reexports"
-import EditTopicBasic from "./EditTopicBasic"
+import EditBasicFields, {
+  AddButton,
+  BasicEditSchema,
+  BasicFormValues,
+  getBasicInitialValues,
+} from "./EditBasicFields"
 
-interface FormValues {
-  name: string
-  optional: boolean
+interface FormValues extends BasicFormValues {
 }
 
 interface Props extends EditTopicInnerSubProps {}
 
-interface FormProps extends FormikProps<FormValues> {
-  value?: TopicLogValueTextSimple
-}
-
-const EditTopicGoalSelectionSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(1)
-    .max(16)
-    .required("Name is required"),
-  optional: Yup.boolean(),
-})
+const EditTopicGoalSelectionSchema = BasicEditSchema.clone().shape({})
 
 function EditTopicGoalSelection(props: Props): JSX.Element {
-  function handleSubmit(values: FormValues) {}
-
   return (
     <Formik<FormValues>
-      initialValues={{ name: props.topic.name, optional: props.topic.optional }}
-      onSubmit={handleSubmit}
+      initialValues={{
+        ...getBasicInitialValues(props.topic),
+      }}
+      onSubmit={props.submitCreateTopicFromValues}
       validationSchema={EditTopicGoalSelectionSchema}>
       {formikProps => (
         <>
-          <EditTopicBasic {...props} {...formikProps} />
+          <EditBasicFields {...props} {...formikProps} />
+          {props.mode === "add" && <AddButton {...formikProps} />}
         </>
       )}
     </Formik>

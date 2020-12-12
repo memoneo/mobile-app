@@ -14,8 +14,6 @@ import { Dayjs } from "dayjs"
 
 interface Props {
   topic: Topic
-  recording: string
-  playing: string
   topicLog: TopicLog
   topicActions: typeof TopicActions
   persons: Person[]
@@ -24,19 +22,11 @@ interface Props {
   topicRecordMap: TopicRecordMap
   topicLogValueMap: TopicLogValueMap
   dateType: TopicLogDateType
-  canRecord: () => boolean
-  startRecording: (topic: Topic) => void
-  playRecording: (topic: Topic, date: AddEntryDate, dateType: TopicLogDateType) => void
-  stopPlayRecording: () => void
-  stopRecording: (body: { topic: Topic }) => void
 }
 
 const AddEntryInner: React.FC<Props> = React.memo(
   ({
     topic,
-    recording,
-    playing,
-    topicRecordMap,
     topicLogValueMap,
     topicLog,
     topicActions,
@@ -44,19 +34,7 @@ const AddEntryInner: React.FC<Props> = React.memo(
     goals,
     date,
     dateType,
-    canRecord,
-    startRecording,
-    playRecording,
-    stopPlayRecording,
-    stopRecording
   }) => {
-    const isRecordingTopic = recording.length > 0 && recording === topic.id
-    const isRecordingDifferentTopic =
-      recording.length > 0 && recording !== topic.id
-    const isPlayingTopic = playing.length > 0 && playing === topic.id
-    const isPlayingDifferentTopic = playing.length > 0 && playing !== topic.id
-    const hasRecording = topicRecordMap.hasOwnProperty(topic.id)
-
     const outerValue = topicLogValueMap[topic.id]
     const innerValue = outerValue ? outerValue.value : undefined
     return (
@@ -70,16 +48,6 @@ const AddEntryInner: React.FC<Props> = React.memo(
         date={date}
         dateType={dateType}
         value={innerValue}
-        canRecord={canRecord()}
-        isRecordingTopic={isRecordingTopic}
-        isRecordingDifferentTopic={isRecordingDifferentTopic}
-        isPlaying={isPlayingTopic}
-        isPlayingDifferentTopic={isPlayingDifferentTopic}
-        hasRecording={hasRecording}
-        startRecording={() => startRecording(topic)}
-        playRecording={() => playRecording(topic, date, dateType)}
-        stopPlayRecording={() => stopPlayRecording()}
-        stopRecording={() => stopRecording({ topic })}
       />
     )
   }

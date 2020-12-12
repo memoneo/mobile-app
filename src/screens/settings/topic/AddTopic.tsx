@@ -1,24 +1,21 @@
 import * as React from "react"
-import { View, StyleSheet, Picker } from "react-native"
+import { View, StyleSheet } from "react-native"
 import {
   Topic,
   TopicLogDateType,
   SelectionType,
   TopicType,
 } from "memoneo-common/lib/types"
-import { contentDiffColor, borderRadius } from "../../../../lib/colors"
-import { TopicActions } from "../../../../redux/topic"
-import AddTopicText from "./AddTopicText"
-import AddTopicSelection from "./AddTopicSelection"
-import AddTopicPersonSelection from "./AddTopicPersonSelection"
-import MPicker from "../../../../components/common/MPicker"
 import { NavigationInjectedProps, withNavigation } from "react-navigation"
-import { SelectionTypeActions } from "../../../../redux/selectionType"
-import MText from "../../../../components/common/MText"
 import { MapDispatchToProps, connect, MapStateToProps } from "react-redux"
 import { bindActionCreators } from "redux"
-import { RootState } from "../../../../redux"
-import AddTopicGoalSelection from "./AddTopicGoalSelection"
+import { Picker } from "@react-native-community/picker"
+import EditTopic from "./EditTopic"
+import { TopicActions } from "../../../redux/topic"
+import { SelectionTypeActions } from "../../../redux/selectionType"
+import MText from "../../../components/common/MText"
+import MPicker from "../../../components/common/MPicker"
+import { RootState } from "../../../redux"
 
 interface OwnProps {}
 
@@ -66,32 +63,17 @@ class AddTopic extends React.Component<AddTopicProps, State> {
   }
 
   render(): JSX.Element {
-    const dateType = this.getDateType()
+    const { selectionTypes, topicActions } = this.props
 
-    const containerStyles: any[] = [addTopicStyles.topicContainer]
+    const dateType = this.getDateType()
 
     return (
       <View style={addTopicStyles.main}>
-        <MText h4 bold>
-          Add Topic
-        </MText>
-        <View style={StyleSheet.flatten(containerStyles)}>
-          <MText bold>Type</MText>
-          <MPicker
-            selectedValue={this.state.topicType}
-            onValueChange={(value: TopicType) =>
-              this.setState({ topicType: value })
-            }
-          >
-            <Picker.Item label="Text Simple" value="text-simple" />
-            <Picker.Item label="Text Rated" value="text-5rated" />
-            <Picker.Item label="Selection" value="selection" />
-            <Picker.Item label="Person Selection" value="person-selection" />
-            <Picker.Item label="Goal Selection" value="goal-selection" />
-          </MPicker>
-          <AddTopicInner
-            {...this.props}
-            topicType={this.state.topicType}
+        <View>
+          <EditTopic
+            mode="add"
+            topicActions={topicActions}
+            selectionTypes={selectionTypes}
             dateType={dateType}
           />
         </View>
@@ -109,49 +91,11 @@ export interface AddTopicInnerSubProps extends AddTopicProps {
   submit: (toUpdate: Partial<Topic>) => void
 }
 
-function AddTopicInner(props: AddTopicInnerProps): JSX.Element {
-  function submit(toUpdate: Partial<Topic>) {
-    const newTopic = { ...toUpdate }
-
-    props.topicActions.createTopicRequest({ topic: newTopic })
-  }
-
-  switch (props.topicType) {
-    case "text-simple":
-      return <AddTopicText {...props} submit={submit} typeName="text-simple" />
-    case "text-5rated":
-      return <AddTopicText {...props} submit={submit} typeName="text-5rated" />
-    case "selection":
-      return (
-        <AddTopicSelection
-          {...props}
-          submit={submit}
-          typeName="selection"
-          selectionTypes={props.selectionTypes}
-        />
-      )
-    case "person-selection":
-      return (
-        <AddTopicPersonSelection
-          {...props}
-          submit={submit}
-          typeName="person-selection"
-        />
-      )
-    case "goal-selection":
-      return (
-        <AddTopicGoalSelection
-          {...props}
-          submit={submit}
-          typeName="goal-selection"
-        />
-      )
-  }
-}
-
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const loading = state.user.loading || state.topic.loading
   const loadingTopic = state.topic.loading
   const errorTopic = state.topic.error
@@ -169,9 +113,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     topicActions: bindActionCreators(TopicActions, dispatch),
     selectionTypeActions: bindActionCreators(SelectionTypeActions, dispatch),
@@ -188,15 +133,6 @@ export const addTopicStyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     backgroundColor: "#fff",
-  },
-  topicContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-    backgroundColor: contentDiffColor,
-    borderRadius: borderRadius,
-    marginVertical: 8,
-    justifyContent: "center",
-    position: "relative",
   },
   topicHeader: {
     flexDirection: "row",

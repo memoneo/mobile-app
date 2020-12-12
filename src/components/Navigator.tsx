@@ -20,7 +20,6 @@ import SettingsSelectionType from "../screens/settings/SettingsSelectionType"
 import SettingsSelectionTypeItemEdit from "../screens/settings/SettingsSelectionTypeItemEdit"
 import SettingsPerson from "../screens/settings/SettingsPerson"
 import EditTopics from "../screens/settings/topic/EditTopics"
-import AddTopic from "../screens/settings/topic/add/AddTopic"
 import EditGoals from "../screens/settings/goal/EditGoals"
 import AddGoal from "../screens/settings/goal/add/AddGoal"
 import Goals from "../screens/Goals"
@@ -28,6 +27,7 @@ import ErrorPage from "../screens/ErrorPage"
 import SettingsSelectionTypeItemAdd from "../screens/settings/SettingsSelectionTypeItemAdd"
 import SettingsPersonAdd from "../screens/settings/SettingsPersonAdd"
 import Entries from "../screens/entry/Entries"
+import AddTopic from "../screens/settings/topic/AddTopic"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {

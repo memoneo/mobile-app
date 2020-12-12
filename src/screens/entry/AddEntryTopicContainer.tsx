@@ -15,6 +15,7 @@ import { AddEntryDate } from "../../types/AddEntry"
 import { contentDiffColor, borderRadius } from "../../lib/colors"
 import AddEntryTopicValue from "./values/AddEntryTopicValue"
 import { TopicActions } from "../../redux/topic"
+import RecordBar from "./RecordBar"
 
 interface Props {
   topic: Topic
@@ -25,16 +26,6 @@ interface Props {
   goals: Goal[]
   date: AddEntryDate
   dateType: TopicLogDateType
-  hasRecording: boolean
-  canRecord: boolean
-  isPlaying: boolean
-  isPlayingDifferentTopic: boolean
-  isRecordingTopic: boolean
-  isRecordingDifferentTopic: boolean
-  startRecording: () => void
-  playRecording: () => void
-  stopPlayRecording: () => void
-  stopRecording: () => void
 }
 
 interface State {
@@ -82,19 +73,10 @@ class AddEntryTopicContainer extends React.Component<Props, State> {
       topic,
       persons,
       goals,
-      isPlaying,
       dateType,
-      hasRecording,
-      isPlayingDifferentTopic,
-      isRecordingDifferentTopic,
-      isRecordingTopic,
-      playRecording,
-      canRecord,
-      startRecording,
-      stopPlayRecording,
-      stopRecording,
       topicActions,
       topicLog,
+      date,
       value,
     } = this.props
     const { topicContainerStyles, hideValue } = this.state
@@ -105,66 +87,17 @@ class AddEntryTopicContainer extends React.Component<Props, State> {
           styles.topicContainer,
           ...topicContainerStyles,
         ])}
-        key={`topic-${topic.id}`}
-      >
+        key={`topic-${topic.id}`}>
         <View style={styles.topicHeader}>
           <MText
             style={styles.topicHeaderText}
             key={`topic-text-${topic.id}`}
-            onPress={this.onHeaderTextPress}
-          >
+            onPress={this.onHeaderTextPress}>
             {formatTopicName(topic, dateType)}
           </MText>
-          <View style={styles.topicHeaderIconBar}>
-            {!isPlaying && (
-              <Icon
-                name="play"
-                type="foundation"
-                reverse
-                size={10}
-                disabled={
-                  !hasRecording ||
-                  isPlayingDifferentTopic ||
-                  isRecordingDifferentTopic ||
-                  isRecordingTopic
-                }
-                onPress={playRecording}
-              />
-            )}
-            {isPlaying && (
-              <Icon
-                name="stop"
-                type="foundation"
-                reverse
-                size={10}
-                onPress={stopPlayRecording}
-              />
-            )}
-            {!isRecordingTopic && (
-              <Icon
-                name="mic"
-                type="feather"
-                reverse
-                disabled={
-                  isRecordingDifferentTopic ||
-                  isPlaying ||
-                  isPlayingDifferentTopic ||
-                  !canRecord
-                }
-                size={10}
-                onPress={startRecording}
-              />
-            )}
-            {isRecordingTopic === true && (
-              <Icon
-                name="stop"
-                type="foundation"
-                reverse
-                size={10}
-                onPress={stopRecording}
-              />
-            )}
-          </View>
+          {topic.hasVoice && (
+            <RecordBar topic={topic} date={date} dateType={dateType} />
+          )}
         </View>
         {!hideValue && (
           <AddEntryTopicValue
@@ -196,9 +129,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  topicHeaderIconBar: {
-    flexDirection: "row",
   },
   topicHeaderText: {
     width: 220,

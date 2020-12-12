@@ -1,62 +1,62 @@
 import * as React from "react"
+import { View, StyleSheet, Alert } from "react-native"
 import {
-  View,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  ViewProps,
-  Alert,
-} from "react-native"
-import { Topic, TopicLogDateType, Person } from "memoneo-common/lib/types"
-import MText from "../../../components/common/MText"
+  Topic,
+  TopicLogDateType,
+  SelectionType,
+  TopicTypeInfo,
+  TopicType,
+} from "memoneo-common/lib/types"
 import { formatTopicName } from "../../../lib/format"
-import { Icon } from "react-native-elements"
-import { AddEntryDate } from "../../../types/AddEntry"
 import {
   contentDiffColor,
   borderRadius,
   RATING_5_COLOR,
 } from "../../../lib/colors"
 import { TopicActions } from "../../../redux/topic"
-import MInput from "../../../components/common/MInput"
-import { Formik } from "formik"
-import { Yup } from "../../../lib/reexports"
 import EditTopicText from "./EditTopicText"
 import EditTopicPersonSelection from "./EditTopicPersonSelection"
 import EditTopicSelection from "./EditTopicSelection"
-import { TouchableHighlight } from "react-native-gesture-handler"
 import EditTopicGoalSelection from "./EditTopicGoal"
+import { BasicFormValues } from "./EditBasicFields"
+
+export type TopicSettingsMode = "edit" | "add"
 
 export interface EditTopicProps {
-  topic: Topic
+  topic?: Topic
   topicActions: typeof TopicActions
-  date: AddEntryDate
   dateType: TopicLogDateType
-  drag: () => void
-  isDragging: boolean
-  isDraggingSelf: boolean
+  mode: TopicSettingsMode
+  selectionTypes?: SelectionType[]
+  drag?: () => void
+  isDragging?: boolean
+  isDraggingSelf?: boolean
 }
 
-interface State {}
-
-interface FormProps {
-  name: string
-  description?: string
+interface State {
+  type: TopicType
 }
 
-const EditTopicSchema = Yup.object().shape({
-  name: Yup.string().min(1).max(16).required("Name is required"),
-})
-
-class EditTopic extends React.Component<EditTopicProps, State> {
+class EditTopic extends React.PureComponent<EditTopicProps, State> {
   constructor(props: EditTopicProps) {
     super(props)
 
-    this.state = {}
+    this.state = {
+      type: props.topic?.typeInfo.type ?? "text-simple",
+    }
   }
 
   deleteTopic = () => {
-    const { topicActions, topic, dateType } = this.props
+    const { mode, topicActions, topic, dateType } = this.props
+
+    if (mode === "add") {
+      return
+    }
+
+    if (!topic) {
+      console.warn("Topic should never be undefined in deleteTopic")
+      return
+    }
 
     if (topic.deleted) {
       Alert.alert(
@@ -81,13 +81,13 @@ class EditTopic extends React.Component<EditTopicProps, State> {
     }
   }
 
-  handleSubmit = (values: FormProps) => {}
+  updateType = (type: TopicType) => this.setState({ type })
 
   render(): JSX.Element {
-    const { topic, dateType, topicActions, isDragging } = this.props
+    const { topic, isDragging } = this.props
 
     const containerStyles: any[] = [styles.topicContainer]
-    if (topic.deleted) {
+    if (topic?.deleted ?? false) {
       containerStyles.push(styles.topicContainerDeleted)
     }
     if (isDragging) {
@@ -97,40 +97,120 @@ class EditTopic extends React.Component<EditTopicProps, State> {
     return (
       <View
         style={StyleSheet.flatten(containerStyles)}
-        key={`topic-${topic.id}`}
-      >
-        <EditTopicInner {...this.props} deleteTopic={this.deleteTopic} />
+        key={`topic-${topic?.id ?? "add"}`}>
+        <EditTopicInner
+          {...this.props}
+          deleteTopic={this.deleteTopic}
+          type={this.state.type}
+          updateType={this.updateType}
+        />
       </View>
     )
   }
 }
 
 interface EditTopicInnerProps extends EditTopicProps {
+  type: TopicType
   deleteTopic: () => void
+  updateType: (type: TopicType) => void
 }
 
 export interface EditTopicInnerSubProps extends EditTopicInnerProps {
-  submit: (toUpdate: Partial<Topic>) => void
+  submitUpdate: (toUpdate: Partial<Topic>) => void
+  submitCreateTopicFromValues: (values: BasicFormValues) => void
+  submitCreateTopic: (topic: Topic) => void
+  changeType: (type: TopicType) => void
 }
 
 function EditTopicInner(props: EditTopicInnerProps): JSX.Element {
-  function submit(toUpdate: Partial<Topic>) {
+  function createTopicFromValues(values: BasicFormValues) {
+    if (props.mode === "edit") {
+      return
+    }
+
+    const typeInfo: TopicTypeInfo = {
+      type: props.type,
+    }
+
+    const topic: Topic = {
+      id: "",
+      name: values.name,
+      description: "",
+      optional: values.optional,
+      deleted: false,
+      typeInfo,
+      hasVoice: values.hasVoice,
+    }
+
+    createTopic(topic)
+  }
+
+  function createTopic(topic: Topic) {
+    if (props.mode === "edit") {
+      return
+    }
+
+    props.topicActions.createTopicRequest({ topic })
+  }
+
+  function updateTopic(toUpdate: Partial<Topic>) {
     const newTopic = { ...props.topic, ...toUpdate }
 
     props.topicActions.updateTopicRequest({ topic: newTopic })
   }
 
-  switch (props.topic.typeInfo.type) {
+  switch (props.topic?.typeInfo.type ?? props.type) {
     case "text-simple":
-      return <EditTopicText {...props} submit={submit} />
+      return (
+        <EditTopicText
+          {...props}
+          submitUpdate={updateTopic}
+          submitCreateTopicFromValues={createTopicFromValues}
+          submitCreateTopic={createTopic}
+          changeType={props.updateType}
+        />
+      )
     case "text-5rated":
-      return <EditTopicText {...props} submit={submit} />
+      return (
+        <EditTopicText
+          {...props}
+          submitUpdate={updateTopic}
+          submitCreateTopicFromValues={createTopicFromValues}
+          submitCreateTopic={createTopic}
+          changeType={props.updateType}
+        />
+      )
     case "selection":
-      return <EditTopicSelection {...props} submit={submit} />
+      return (
+        <EditTopicSelection
+          {...props}
+          selectionTypes={props.selectionTypes ?? []}
+          submitUpdate={updateTopic}
+          submitCreateTopicFromValues={createTopicFromValues}
+          submitCreateTopic={createTopic}
+          changeType={props.updateType}
+        />
+      )
     case "person-selection":
-      return <EditTopicPersonSelection {...props} submit={submit} />
+      return (
+        <EditTopicPersonSelection
+          {...props}
+          submitUpdate={updateTopic}
+          submitCreateTopicFromValues={createTopicFromValues}
+          submitCreateTopic={createTopic}
+          changeType={props.updateType}
+        />
+      )
     case "goal-selection":
-      return <EditTopicGoalSelection {...props} submit={submit} />
+      return (
+        <EditTopicGoalSelection
+          {...props}
+          submitUpdate={updateTopic}
+          submitCreateTopicFromValues={createTopicFromValues}
+          submitCreateTopic={createTopic}
+          changeType={props.updateType}
+        />
+      )
   }
 }
 

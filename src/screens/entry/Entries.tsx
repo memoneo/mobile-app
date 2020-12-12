@@ -58,7 +58,7 @@ class Entries extends React.Component<Props, State> {
     const month = dayjs()
 
     const topicLogMap: CalendarTopicLogMap = {}
-    const adjustedTopicLogs = topicLogs.filter((topicLog) => {
+    const adjustedTopicLogs = topicLogs.filter(topicLog => {
       const sameYear = topicLog.date.year() === month.year()
       const topicLogMonth = topicLog.date.month()
       const currentMonth = month.month()
@@ -101,7 +101,7 @@ class Entries extends React.Component<Props, State> {
               buttonStyle={styles.entryInfoButton}
               onPress={() =>
                 this.props.navigation.navigate("AddEntry", {
-                  date: focusedTopicLog.date,
+                  date: focusedTopicLog?.date ?? focusedDay,
                 })
               }
               title={focusedTopicLog ? "Edit" : "Create"}
@@ -113,9 +113,11 @@ class Entries extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const topicLogs = state.topic.topicLogs
   const topicLogValueMap = state.topic.topicLogValueMap
 
@@ -125,9 +127,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     topicActions: bindActionCreators(TopicActions, dispatch),
   }
