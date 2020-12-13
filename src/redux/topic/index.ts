@@ -152,7 +152,7 @@ export const topicReducer = handleActions<TopicState, any>(
         action.payload.topicLogs || []
 
       let topicLogs: TopicLogWithDatesAsDayJs[] = tmpTopicLogs
-        .map((topicLog) => {
+        .map(topicLog => {
           return {
             id: topicLog.id,
             dateType: topicLog.dateType,
@@ -171,7 +171,6 @@ export const topicReducer = handleActions<TopicState, any>(
 
           return 0
         })
-
 
       return {
         ...state,
@@ -243,7 +242,7 @@ export const topicReducer = handleActions<TopicState, any>(
       const topicLogValues: TopicLogValueContainer<TopicLogValue>[] =
         action.payload.topicLogValues || []
       topicLogValues.forEach(
-        (topicLogValue) =>
+        topicLogValue =>
           (newTopicLogValueMap[topicLogValue.topicId] = topicLogValue)
       )
 
@@ -334,7 +333,7 @@ export const topicReducer = handleActions<TopicState, any>(
 
       if (!error) {
         const idx = newTopics.findIndex(
-          (currentTopic) => currentTopic.id === topic.id
+          currentTopic => currentTopic.id === topic.id
         )
         if (idx !== -1) {
           newTopics[idx] = topic
@@ -768,6 +767,7 @@ function* handleUpdateTopic(action: any) {
           description: topic.description,
           optional: topic.optional,
           recover,
+          hasVoice: topic.hasVoice,
         },
         {
           withCredentials: true,
