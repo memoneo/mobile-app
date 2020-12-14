@@ -2234,9 +2234,9 @@ available-typed-arrays@^1.0.0, available-typed-arrays@^1.0.2:
     array-filter "^1.0.0"
 
 await-protect@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/await-protect/-/await-protect-1.0.13.tgz#3345bf3c1f510c711c36f15da75720e106ea6481"
-  integrity sha512-UIR/O4d9hQcUQjuOoHltISjI1y8EbJgBUviXJc7eICgHos61V70Qmw0pO+ezs28SxiISshXux60KL5c0KaUiWQ==
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/await-protect/-/await-protect-1.0.14.tgz#d56c9a10d44c3bdb72270b1ae031f6e22a911e50"
+  integrity sha512-wumRKJZMwF0IZUbo+xjf8lMNJrQOSfIIHhn1V8VjbzWE1h9YHqGbeexXTTBs23CukYiCwAl2p0VfLr+ibffCZA==
 
 aws-sign2@~0.7.0:
   version "0.7.0"

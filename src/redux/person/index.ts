@@ -1,6 +1,6 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
-import { take, call, put, delay, takeEvery } from "redux-saga/effects"
+import { call, put, takeEvery } from "redux-saga/effects"
 import { API_URL } from "../../../config"
 import axios, { AxiosResponse, AxiosError } from "axios"
 import {
@@ -141,7 +141,7 @@ export function* watchHandleGetPersons() {
 function* handleGetPersons() {
   const hash: string = yield call(getHash)
 
-  const personsResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/person/get`, {
         withCredentials: true,
@@ -150,18 +150,16 @@ function* handleGetPersons() {
     )
   )
 
-  if (personsResult.err) {
+  if (err) {
     yield put(
       actions.getPersonsResponse({
-        error: getErrorMessage(personsResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = personsResult.ok!
-
-  const persons: Person[] = res.data.data
+  const persons: Person[] = body.data.data
 
   yield put(
     actions.getPersonsResponse({
@@ -184,7 +182,7 @@ function* handleCreatePerson(action) {
 
   const hash: string = yield call(getHash)
 
-  const createPersonResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/person/create`,
@@ -197,17 +195,15 @@ function* handleCreatePerson(action) {
     )
   )
 
-  if (createPersonResult.err) {
+  if (err) {
     yield put(
       actions.createPersonResponse({
-        error: getErrorMessage(createPersonResult.err),
+        error: getErrorMessage(err),
       })
     )
   }
 
-  const res = createPersonResult.ok!
-
-  const person: Person = res.data.data
+  const person: Person = body.data.data
 
   yield put(
     actions.createPersonResponse({
@@ -226,7 +222,7 @@ function* handleDeletePerson(action) {
 
   const hash: string = yield call(getHash)
 
-  const deleteResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/person/${person.id}`, {
         withCredentials: true,
@@ -235,10 +231,10 @@ function* handleDeletePerson(action) {
     )
   )
 
-  if (deleteResult.err) {
+  if (err) {
     yield put(
       actions.deletePersonResponse({
-        error: getErrorMessage(deleteResult.err),
+        error: getErrorMessage(err),
       })
     )
     return

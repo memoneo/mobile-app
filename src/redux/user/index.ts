@@ -1,4 +1,4 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
 import { take, call, put, takeEvery } from "redux-saga/effects"
 import { API_URL } from "../../../config"
@@ -64,7 +64,7 @@ export function* watchHandleGetUser() {
 function* handleGetUser() {
   const hash: string = yield call(getHash)
 
-  const userResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [userBody, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/user/get`, {
         withCredentials: true,
@@ -73,18 +73,16 @@ function* handleGetUser() {
     )
   )
 
-  if (userResult.err) {
+  if (err) {
     yield put(
       actions.getUserResponse({
-        error: getErrorMessage(userResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = userResult.ok!
-
-  const user: User = res.data.data
+  const user: User = userBody.data.data
 
   yield put(
     actions.getUserResponse({

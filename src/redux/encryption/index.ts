@@ -1,6 +1,5 @@
 import { createAction, handleActions } from "redux-actions"
 import { take, call, put } from "redux-saga/effects"
-import { Result } from "await-protect"
 import { getTextEncryptionKey, setTextEncryptionKey } from "../../lib/redux"
 
 export interface EncryptionState {
@@ -77,9 +76,9 @@ export function* handleRetrieveKey() {
   while (true) {
     yield take(actions.retrieveKeyRequest)
 
-    const res: Result<string, Error> = yield call(getTextEncryptionKey)
+    const [body, err] = yield call(getTextEncryptionKey)
 
-    if (res.err) {
+    if (err) {
       yield put(
         actions.retrieveKeyResponse({
           error: "Unable to retrieve text encryption key.",
@@ -87,7 +86,7 @@ export function* handleRetrieveKey() {
       )
     }
 
-    const key = !!res.ok ? res.ok : ""
+    const key = body ?? ""
 
     yield put(
       actions.retrieveKeyResponse({ error: "", textEncryptionKey: key })
@@ -100,7 +99,7 @@ export function* handleInitKey() {
     const action = yield take(actions.initKeyRequest)
     const { textEncryptionKey } = action.payload
 
-    const { err }: Result<void, Error> = yield call(
+    const [_, err] = yield call(
       setTextEncryptionKey,
       textEncryptionKey
     )

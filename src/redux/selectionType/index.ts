@@ -1,4 +1,4 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
 import { take, call, put, takeEvery } from "redux-saga/effects"
 import { API_URL } from "../../../config"
@@ -248,7 +248,7 @@ function* handleGetSelectionType(action) {
   const hash: string = yield call(getHash)
   const selectionTypeId: string = action.payload.selectionTypeId
 
-  const selectionTypeResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [selectionTypeBody, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/selectiontype/get/${selectionTypeId}`, {
         withCredentials: true,
@@ -257,18 +257,16 @@ function* handleGetSelectionType(action) {
     )
   )
 
-  if (selectionTypeResult.err) {
+  if (err) {
     yield put(
       actions.getSelectionTypeResponse({
-        error: getErrorMessage(selectionTypeResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = selectionTypeResult.ok!
-
-  const selectionType: SelectionType = res.data.data
+  const selectionType: SelectionType = selectionTypeBody.data.data
 
   yield put(
     actions.getSelectionTypeResponse({
@@ -285,7 +283,7 @@ export function* watchHandleGetSelectionTypes() {
 function* handleGetSelectionTypes() {
   const hash: string = yield call(getHash)
 
-  const selectionTypeResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [selectionTypesBody, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/selectiontype/get`, {
         withCredentials: true,
@@ -294,18 +292,16 @@ function* handleGetSelectionTypes() {
     )
   )
 
-  if (selectionTypeResult.err) {
+  if (err) {
     yield put(
       actions.getSelectionTypesResponse({
-        error: getErrorMessage(selectionTypeResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = selectionTypeResult.ok!
-
-  const selectionTypes: SelectionType[] = res.data.data
+  const selectionTypes: SelectionType[] = selectionTypesBody.data.data
 
   yield put(
     actions.getSelectionTypesResponse({
@@ -325,7 +321,7 @@ function* handleCreateSelectionType(action) {
   const name: string | undefined = action.payload.name
   if (!name) throw Error("name in handleCreateSelectionType may not be empty")
 
-  const selectionTypeResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/selectiontype/create`,
@@ -338,18 +334,16 @@ function* handleCreateSelectionType(action) {
     )
   )
 
-  if (selectionTypeResult.err) {
+  if (err) {
     yield put(
       actions.createSelectionTypeResponse({
-        error: getErrorMessage(selectionTypeResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = selectionTypeResult.ok!
-
-  const selectionType: SelectionType = res.data.data
+  const selectionType: SelectionType = body.data.data
 
   yield put(
     actions.createSelectionTypeResponse({
@@ -378,7 +372,7 @@ function* handleAddItemToSelectionType(action) {
   if (!name)
     throw Error("name in handleAddItemToSelectionType may not be undefined")
 
-  const selectionTypeResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/selectiontype/item/add/${selectionType.id}`,
@@ -391,18 +385,16 @@ function* handleAddItemToSelectionType(action) {
     )
   )
 
-  if (selectionTypeResult.err) {
+  if (err) {
     yield put(
       actions.addItemToSelectionTypeResponse({
-        error: getErrorMessage(selectionTypeResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = selectionTypeResult.ok!
-
-  const newSelectionType: SelectionType = res.data.data
+  const newSelectionType: SelectionType = body.data.data
 
   yield put(
     actions.addItemToSelectionTypeResponse({
@@ -435,7 +427,7 @@ function* handleDeleteItemFromSelectionType(action) {
       "selectionTypeItem in handleDeleteItemFromSelectionType may not be undefined"
     )
 
-  const selectionTypeResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.get(
         `${API_URL}/selectiontype/item/delete/${selectionType.id}/${selectionTypeItem.id}`,
@@ -447,18 +439,16 @@ function* handleDeleteItemFromSelectionType(action) {
     )
   )
 
-  if (selectionTypeResult.err) {
+  if (err) {
     yield put(
       actions.deleteItemFromSelectionTypeResponse({
-        error: getErrorMessage(selectionTypeResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = selectionTypeResult.ok!
-
-  const newSelectionType: SelectionType = res.data.data
+  const newSelectionType: SelectionType = body.data.data
 
   yield put(
     actions.deleteItemFromSelectionTypeResponse({

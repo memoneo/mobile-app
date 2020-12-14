@@ -1,4 +1,4 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
 import { take, call, put, takeEvery } from "redux-saga/effects"
 import { readDir, ReadDirItem, readFile, mkdir, exists } from "react-native-fs"
@@ -117,11 +117,11 @@ export function* handleGetRecordings() {
       dayjs(date).format("D-MMMM-YYYY")
     )
 
-    const existsResult: Result<boolean, Error> = yield call(
+    const [fileExists, existsErr] = yield call(
       lazyProtect(exists(recordingDirectory))
     )
-    if (existsResult.err) {
-      console.log(existsResult.err.message)
+    if (existsErr) {
+      console.log(existsErr.message)
       yield put(
         actions.getRecordingsResponse({
           error: "Unable to check if file path exists in document directory",
@@ -130,7 +130,7 @@ export function* handleGetRecordings() {
       continue
     }
 
-    if (!existsResult.ok) {
+    if (!fileExists) {
       yield put(
         actions.getRecordingsResponse({
           error: "",
@@ -140,12 +140,10 @@ export function* handleGetRecordings() {
       continue
     }
 
-    const dirResult: Result<ReadDirItem[], Error> = yield call(
-      lazyProtect(readDir(recordingDirectory))
-    )
+    const [dir, dirError] = yield call(lazyProtect(readDir(recordingDirectory)))
 
-    if (dirResult.err) {
-      console.log(dirResult.err.message)
+    if (dirError) {
+      console.log(dirError.message)
       yield put(
         actions.getRecordingsResponse({
           error: "Unable to read files in document directory",
@@ -154,9 +152,7 @@ export function* handleGetRecordings() {
       continue
     }
 
-    const res = dirResult.ok!
-
-    const recordingUris: string[] = res.map(readDirItem => readDirItem.path)
+    const recordingUris: string[] = dir.map(readDirItem => readDirItem.path)
     const topicRecords: TopicRecord[] = recordingUris.map(uri => {
       return {
         uri,
@@ -209,30 +205,30 @@ function* handleSaveRecording(action: any) {
     throw Error("topicLog may not be null/empty in handleSaveRecording")
   if (!value) throw Error("value may not be null/empty in handleSaveRecording")
 
-  const audioFileConvertResult: Result<string, Error> = yield call(
-    lazyProtect(convertM4aToOgg(audioFileUri))
-  )
+  // const audioFileConvertResult: Result<string, Error> = yield call(
+  //   lazyProtect(convertM4aToOgg(audioFileUri))
+  // )
 
-  if (audioFileConvertResult.err) {
-    console.log(audioFileConvertResult.err.message)
-    yield put(
-      actions.saveRecordingResponse({
-        error: "Unable to convert audio file to wav for speech API consumption",
-      })
-    )
-    return
-  }
+  // if (audioFileConvertResult.err) {
+  //   console.log(audioFileConvertResult.err.message)
+  //   yield put(
+  //     actions.saveRecordingResponse({
+  //       error: "Unable to convert audio file to wav for speech API consumption",
+  //     })
+  //   )
+  //   return
+  // }
 
   const recordingDirectoryPath = getRecordingDirectory(
     dateType,
     dayjs(date).format("D-MMMM-YYYY")
   )
 
-  const mkdirResult: Result<void, Error> = yield call(
+  const [__, mkdirError] = yield call(
     lazyProtect(mkdir(recordingDirectoryPath, {}))
   )
-  if (mkdirResult.err) {
-    console.log(mkdirResult.err.message)
+  if (mkdirError) {
+    console.log(mkdirError.message)
     yield put(
       actions.saveRecordingResponse({
         error: "Unable to create directory",
@@ -246,17 +242,17 @@ function* handleSaveRecording(action: any) {
     dayjs(date).format("D-MMMM-YYYY")
   )}/${topic.id}.m4a`
 
-  const audioFileCopyResult: Result<void, Error> = yield call(
+  const [_, moveError] = yield call(
     lazyProtect(
-      FileSystem.copyAsync({
-        from: audioFileConvertResult.ok!,
+      FileSystem.moveAsync({
+        from: audioFileUri,
         to: newAudioFilePath,
       })
     )
   )
 
-  if (audioFileCopyResult.err) {
-    console.log(audioFileCopyResult.err.message)
+  if (moveError) {
+    console.log(moveError.message)
     yield put(
       actions.saveRecordingResponse({
         error: "Unable to copy converted audio file to document directory",
@@ -265,52 +261,52 @@ function* handleSaveRecording(action: any) {
     return
   }
 
-  console.log(`Sending audio file from ${newAudioFilePath} to speech API`)
-  const readFileResult: Result<string, Error> = yield call(
-    lazyProtect(readFile(audioFileUri.replace(".m4a", ".ogg"), "base64"))
-  )
-  if (readFileResult.err) {
-    yield put(
-      actions.saveRecordingResponse({
-        error: `Unable to read audio file ${newAudioFilePath}`,
-      })
-    )
-    return
-  }
+  // console.log(`Sending audio file from ${newAudioFilePath} to speech API`)
+  // const readFileResult: Result<string, Error> = yield call(
+  //   lazyProtect(readFile(audioFileUri.replace(".m4a", ".ogg"), "base64"))
+  // )
+  // if (readFileResult.err) {
+  //   yield put(
+  //     actions.saveRecordingResponse({
+  //       error: `Unable to read audio file ${newAudioFilePath}`,
+  //     })
+  //   )
+  //   return
+  // }
 
-  const hash: string = yield call(getHash)
+  // const hash: string = yield call(getHash)
+  //
+  // const recognizeResult: Result<AxiosResponse, AxiosError> = yield call(
+  //   lazyProtect(
+  //     axios.post(
+  //       `${API_URL}/recognize`,
+  //       {
+  //         audioContent: readFileResult.ok,
+  //         topicId: topic.id,
+  //         type: topic.typeInfo.type,
+  //         topicLogId: topicLog.id,
+  //         value,
+  //       },
+  //       {
+  //         withCredentials: true,
+  //         headers: { ...defaultHeaders, ...authorizedHeader(hash) },
+  //       }
+  //     )
+  //   )
+  // )
 
-  const recognizeResult: Result<AxiosResponse, AxiosError> = yield call(
-    lazyProtect(
-      axios.post(
-        `${API_URL}/recognize`,
-        {
-          audioContent: readFileResult.ok,
-          topicId: topic.id,
-          type: topic.typeInfo.type,
-          topicLogId: topicLog.id,
-          value,
-        },
-        {
-          withCredentials: true,
-          headers: { ...defaultHeaders, ...authorizedHeader(hash) },
-        }
-      )
-    )
-  )
+  // if (recognizeResult.err) {
+  //   yield put(
+  //     actions.saveRecordingResponse({
+  //       error: getErrorMessage(recognizeResult.err),
+  //     })
+  //   )
+  //   return
+  // }
 
-  if (recognizeResult.err) {
-    yield put(
-      actions.saveRecordingResponse({
-        error: getErrorMessage(recognizeResult.err),
-      })
-    )
-    return
-  }
+  // const res = recognizeResult.ok!
 
-  const res = recognizeResult.ok!
-
-  const text: string = res.data.data.text
+  // const text: string = res.data.data.text
 
   yield put(
     actions.saveRecordingResponse({

@@ -1,4 +1,4 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
 import { take, call, put, delay, takeEvery } from "redux-saga/effects"
 import {
@@ -357,7 +357,7 @@ export function* watchHandleGetTopics() {
 function* handleGetTopics(action: any) {
   const hash: string = yield call(getHash)
 
-  const topicsResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [topicsBody, topicsError] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/topic/get`, {
         withCredentials: true,
@@ -366,18 +366,16 @@ function* handleGetTopics(action: any) {
     )
   )
 
-  if (topicsResult.err) {
+  if (topicsError) {
     yield put(
       actions.getTopicsResponse({
-        error: getErrorMessage(topicsResult.err),
+        error: getErrorMessage(topicsError),
       })
     )
     return
   }
 
-  const res = topicsResult.ok!
-
-  const topics: Topic[] = res.data.data
+  const topics: Topic[] = topicsBody.data.data
 
   yield put(
     actions.getTopicsResponse({
@@ -394,7 +392,7 @@ export function* watchHandleGetTopicLogs() {
 function* handleGetTopicLogs(action: any) {
   const hash: string = yield call(getHash)
 
-  const topicLogsResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [topicLogsBody, topicLogsError] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/topiclog/get`, {
         withCredentials: true,
@@ -403,18 +401,16 @@ function* handleGetTopicLogs(action: any) {
     )
   )
 
-  if (topicLogsResult.err) {
+  if (topicLogsError) {
     yield put(
       actions.getTopicLogsResponse({
-        error: getErrorMessage(topicLogsResult.err),
+        error: getErrorMessage(topicLogsError),
       })
     )
     return
   }
 
-  const res = topicLogsResult.ok!
-
-  const topicLogs: TopicLog[] = res.data.data
+  const topicLogs: TopicLog[] = topicLogsBody.data.data
 
   yield put(
     actions.getTopicLogsResponse({
@@ -434,7 +430,7 @@ export function* handleGetOrCreateTopicLog() {
 
     const dateString = formatAddEntryDate(date)
 
-    const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+    const [getOrCreateBody, getOrCreateError] = yield call(
       lazyProtect(
         axios.get(`${API_URL}/topiclog/getorcreate/${dateType}/${dateString}`, {
           withCredentials: true,
@@ -443,18 +439,16 @@ export function* handleGetOrCreateTopicLog() {
       )
     )
 
-    if (getOrCreateResult.err) {
+    if (getOrCreateError) {
       yield put(
         actions.getOrCreateTopicLogResponse({
-          error: getErrorMessage(getOrCreateResult.err),
+          error: getErrorMessage(getOrCreateError),
         })
       )
       continue
     }
 
-    const res = getOrCreateResult.ok!
-
-    const topicLog: TopicLog = res.data.data
+    const topicLog: TopicLog = getOrCreateBody.data.data
 
     yield put(
       actions.getOrCreateTopicLogResponse({
@@ -494,40 +488,38 @@ function* handleCreateOrUpdateTopicLogValue(action) {
       | TopicLogValueTextFiveRated
       | TopicLogValueTextSimple
     if (textValue.text && textValue.text.length > 0) {
-      const textEncryptionKeyRes: Result<string, Error> = yield call(
+      const [textEncryptionKey, textEncryptionKeyError] = yield call(
         getTextEncryptionKey
       )
 
-      if (textEncryptionKeyRes.err) {
+      if (textEncryptionKeyError) {
         yield put(
           actions.createOrUpdateTopicLogValueResponse({
-            error: textEncryptionKeyRes.err.message,
+            error: textEncryptionKeyError.message,
           })
         )
         return
       }
 
-      const key = textEncryptionKeyRes.ok
-
-      const encryptionRes: Result<string, Error> = yield call(
-        lazyProtect(encryptText(textValue.text, key))
+      const [encryptedText, encryptionError] = yield call(
+        lazyProtect(encryptText(textValue.text, textEncryptionKey))
       )
-      if (encryptionRes.err) {
-        console.error("Encryption error occurred " + encryptionRes.err.message)
+      if (encryptionError) {
+        console.error("Encryption error occurred " + encryptionError.message)
         yield put(
           actions.createOrUpdateTopicLogValueResponse({
-            error: encryptionRes.err.message,
+            error: encryptionError.message,
           })
         )
         return
       }
 
-      textValue.text = encryptionRes.ok!
+      textValue.text = encryptedText
     }
     body.encrypted = true
   }
 
-  const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [getOrCreateBody, getOrCreateError] = yield call(
     lazyProtect(
       axios.post(`${API_URL}/topiclogvalue/createorupdate`, body, {
         withCredentials: true,
@@ -536,10 +528,10 @@ function* handleCreateOrUpdateTopicLogValue(action) {
     )
   )
 
-  if (getOrCreateResult.err) {
+  if (getOrCreateError) {
     yield put(
       actions.createOrUpdateTopicLogValueResponse({
-        error: getErrorMessage(getOrCreateResult.err),
+        error: getErrorMessage(getOrCreateError),
       })
     )
     return
@@ -565,7 +557,7 @@ function* handleGetTopicLogValues(action) {
 
   const hash: string = yield call(getHash)
 
-  const getOrCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [getOrCreateBody, getOrCreateError] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/topiclogvalue/get/${topicLog.id}`, {
         withCredentials: true,
@@ -574,34 +566,32 @@ function* handleGetTopicLogValues(action) {
     )
   )
 
-  if (getOrCreateResult.err) {
+  if (getOrCreateError) {
     yield put(
       actions.getTopicLogValuesResponse({
-        error: getErrorMessage(getOrCreateResult.err),
+        error: getErrorMessage(getOrCreateError),
       })
     )
     return
   }
 
-  const res = getOrCreateResult.ok!
-  const topicLogValues: TopicLogValueContainer<TopicLogValue>[] = res.data.data
+  const topicLogValues: TopicLogValueContainer<TopicLogValue>[] = getOrCreateBody.data.data
 
-  const textEncryptionKeyRes: Result<string, Error> = yield call(
+  const [textEncryptionKey, textEncryptionKeyError] = yield call(
     getTextEncryptionKey
   )
 
-  if (textEncryptionKeyRes.err) {
+  if (textEncryptionKeyError) {
     yield put(
-      actions.createOrUpdateTopicLogValueResponse({
-        error: textEncryptionKeyRes.err.message,
+      actions.getTopicLogValuesResponse({
+        error: textEncryptionKeyError.message,
+        topicLogValues: []
       })
     )
     return
   }
 
-  const key = textEncryptionKeyRes.ok
-
-  yield decryptTopicLogValues(topicLogValues, key)
+  yield decryptTopicLogValues(topicLogValues, textEncryptionKey)
 
   yield put(
     actions.getTopicLogValuesResponse({
@@ -620,7 +610,7 @@ function* handleDeleteTopic(action: any) {
   const topic: Topic | undefined = action.payload.topic
   if (!topic) throw new Error("topic may not be undefined in handleDeleteTopic")
 
-  const topicDeleteResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [_, topicDeleteError] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/topic/delete/${topic.id}`, {
         withCredentials: true,
@@ -629,10 +619,10 @@ function* handleDeleteTopic(action: any) {
     )
   )
 
-  if (topicDeleteResult.err) {
+  if (topicDeleteError) {
     yield put(
       actions.deleteTopicResponse({
-        error: getErrorMessage(topicDeleteResult.err),
+        error: getErrorMessage(topicDeleteError),
       })
     )
     return
@@ -665,7 +655,7 @@ function* handleChangePriorityTopic(action: any) {
   if (newRank === null || newRank === undefined)
     throw new Error("newRank may not be undefined in handleChangePriorityTopic")
 
-  const topicUpdateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [topicUpdateBody, topicUpdateError] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/topic/edit`,
@@ -681,10 +671,10 @@ function* handleChangePriorityTopic(action: any) {
     )
   )
 
-  if (topicUpdateResult.err) {
+  if (topicUpdateError) {
     yield put(
       actions.changePriorityTopicResponse({
-        error: getErrorMessage(topicUpdateResult.err),
+        error: getErrorMessage(topicUpdateError),
       })
     )
     return
@@ -710,7 +700,7 @@ function* handleCreateTopic(action: any) {
   if (!topic.typeInfo)
     throw new Error("typeInfo must be provided for topic creation")
 
-  const topicCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [topicCreateBody, topicCreateError] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/topic/create`,
@@ -728,16 +718,16 @@ function* handleCreateTopic(action: any) {
     )
   )
 
-  if (topicCreateResult.err) {
+  if (topicCreateError) {
     yield put(
       actions.createTopicResponse({
-        error: getErrorMessage(topicCreateResult.err),
+        error: getErrorMessage(topicCreateError),
       })
     )
     return
   }
 
-  const newTopic = topicCreateResult.ok!.data.data
+  const newTopic = topicCreateBody.data.data
 
   yield put(
     actions.createTopicResponse({
@@ -757,7 +747,7 @@ function* handleUpdateTopic(action: any) {
   if (!topic) throw new Error("topic may not be undefined in handleUpdateTopic")
   const recover: boolean | undefined = action.payload.recover
 
-  const topicUpdateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [topicUpdateBody, topicUpdateError] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/topic/edit`,
@@ -777,10 +767,10 @@ function* handleUpdateTopic(action: any) {
     )
   )
 
-  if (topicUpdateResult.err) {
+  if (topicUpdateError) {
     yield put(
       actions.updateTopicResponse({
-        error: getErrorMessage(topicUpdateResult.err),
+        error: getErrorMessage(topicUpdateError),
       })
     )
     return

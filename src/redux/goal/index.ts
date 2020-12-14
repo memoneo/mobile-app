@@ -1,6 +1,6 @@
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { createAction, handleActions } from "redux-actions"
-import { take, call, put, delay, takeEvery } from "redux-saga/effects"
+import { call, put, takeEvery } from "redux-saga/effects"
 import { API_URL } from "../../../config"
 import axios, { AxiosResponse, AxiosError } from "axios"
 import {
@@ -118,13 +118,13 @@ export const goalReducer = handleActions<GoalState, any>(
       const newGoals: Goal[] = [...state.goals]
 
       if (!error) {
-        const subgoals = newGoals.filter((g) => g.parent === goal.id)
-        subgoals.forEach((g) => (g.deleted = true))
+        const subgoals = newGoals.filter(g => g.parent === goal.id)
+        subgoals.forEach(g => (g.deleted = true))
 
         goal.deleted = true
 
         if (hardDeleted) {
-          const currentIndex = newGoals.findIndex((g) => g.id === goal.id)
+          const currentIndex = newGoals.findIndex(g => g.id === goal.id)
 
           newGoals.splice(currentIndex, 1)
         }
@@ -171,7 +171,7 @@ export const goalReducer = handleActions<GoalState, any>(
       const newGoals: Goal[] = [...state.goals]
       if (goal && !error) {
         if (goal.parent) {
-          const parentGoalIdx = newGoals.findIndex((g) => g.id === goal.parent)
+          const parentGoalIdx = newGoals.findIndex(g => g.id === goal.parent)
           goal.parent = newGoals[parentGoalIdx]
 
           var insertIdx = parentGoalIdx + 1
@@ -215,7 +215,7 @@ export const goalReducer = handleActions<GoalState, any>(
 
       if (!error) {
         const idx = newGoals.findIndex(
-          (currentGoal) => currentGoal.id === goal.id
+          currentGoal => currentGoal.id === goal.id
         )
         if (idx !== -1) {
           newGoals[idx] = goal
@@ -239,7 +239,7 @@ export function* watchHandleGetGoals() {
 function* handleGetGoals(action: any) {
   const hash: string = yield call(getHash)
 
-  const goalsResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/goal/get`, {
         withCredentials: true,
@@ -248,18 +248,16 @@ function* handleGetGoals(action: any) {
     )
   )
 
-  if (goalsResult.err) {
+  if (err) {
     yield put(
       actions.getGoalsResponse({
-        error: getErrorMessage(goalsResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const res = goalsResult.ok!
-
-  const goals: Goal[] = res.data.data
+  const goals: Goal[] = body.data.data
 
   yield put(
     actions.getGoalsResponse({
@@ -278,7 +276,7 @@ function* handleDeleteGoal(action: any) {
   const goal: Goal | undefined = action.payload.goal
   if (!goal) throw new Error("goal may not be undefined in handleDeleteGoal")
 
-  const goalDeleteResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.get(`${API_URL}/goal/delete/${goal.id}`, {
         withCredentials: true,
@@ -287,16 +285,16 @@ function* handleDeleteGoal(action: any) {
     )
   )
 
-  if (goalDeleteResult.err) {
+  if (err) {
     yield put(
       actions.deleteGoalResponse({
-        error: getErrorMessage(goalDeleteResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const hardDeleted = goalDeleteResult.ok.data.data || false
+  const hardDeleted = body.data.data || false
 
   yield put(
     actions.deleteGoalResponse({
@@ -326,7 +324,7 @@ function* handleChangePriorityGoal(action: any) {
   if (newRank === null || newRank === undefined)
     throw new Error("newRank may not be undefined in handleChangePriorityGoal")
 
-  const goalUpdateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/goal/edit`,
@@ -342,17 +340,14 @@ function* handleChangePriorityGoal(action: any) {
     )
   )
 
-  if (goalUpdateResult.err) {
+  if (err) {
     yield put(
       actions.changePriorityGoalResponse({
-        error: getErrorMessage(goalUpdateResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
-
-  // TODO
-  const sortedGoals = orderedGoals
 
   yield put(
     actions.changePriorityGoalResponse({
@@ -373,7 +368,7 @@ function* handleCreateGoal(action: any) {
   if (!goal) throw new Error("goal may not be undefined in handleUpdateGoal")
   if (!goal.name) throw new Error("name must be provided for goal creation")
 
-  const goalCreateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/goal/create`,
@@ -390,16 +385,16 @@ function* handleCreateGoal(action: any) {
     )
   )
 
-  if (goalCreateResult.err) {
+  if (err) {
     yield put(
       actions.createGoalResponse({
-        error: getErrorMessage(goalCreateResult.err),
+        error: getErrorMessage(err),
       })
     )
     return
   }
 
-  const newGoal = goalCreateResult.ok!.data.data
+  const newGoal = body.data.data
 
   yield put(
     actions.createGoalResponse({
@@ -419,7 +414,7 @@ function* handleUpdateGoal(action: any) {
   if (!goal) throw new Error("goal may not be undefined in handleUpdateGoal")
   const recover: boolean | undefined = action.payload.recover
 
-  const goalUpdateResult: Result<AxiosResponse, AxiosError> = yield call(
+  const [body, err] = yield call(
     lazyProtect(
       axios.post(
         `${API_URL}/goal/edit`,
@@ -439,10 +434,10 @@ function* handleUpdateGoal(action: any) {
     )
   )
 
-  if (goalUpdateResult.err) {
+  if (err) {
     yield put(
       actions.updateGoalResponse({
-        error: getErrorMessage(goalUpdateResult.err),
+        error: getErrorMessage(err),
       })
     )
     return

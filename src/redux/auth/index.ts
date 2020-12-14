@@ -1,7 +1,7 @@
 import { createAction, handleActions } from "redux-actions"
 import { AxiosResponse, AxiosError } from "axios"
 import { take, call, put } from "redux-saga/effects"
-import { lazyProtect, Result } from "await-protect"
+import { lazyProtect } from "await-protect"
 import { SECURE_STORE_HASH_KEY, API_URL } from "../../../config"
 import { SecureStore } from "../../lib/reexports"
 import { axios } from "memoneo-common/lib/reexports"
@@ -115,7 +115,7 @@ export function* handleAutoLogin() {
     const hash: string = yield call(getHash)
     //console.log(`AutoLogin with hash ${hash}`)
 
-    const { ok, err }: Result<AxiosResponse, AxiosError> = yield call(
+    const [_, err] = yield call(
       lazyProtect(
         axios.post(
           `${API_URL}/login`,
@@ -139,7 +139,7 @@ export function* handleLogin() {
     const action = yield take(actions.loginRequest)
     const { mail, password } = action.payload
 
-    const { ok, err }: Result<AxiosResponse, AxiosError> = yield call(
+    const [loginBody, loginErr] = yield call(
       lazyProtect(
         axios.post(
           `${API_URL}/login`,
@@ -149,20 +149,20 @@ export function* handleLogin() {
       )
     )
 
-    if (err) {
-      yield put(actions.loginResponse({ error: getErrorMessage(err) }))
+    if (loginErr) {
+      yield put(actions.loginResponse({ error: getErrorMessage(loginErr) }))
       continue
     }
 
-    const token = ok.data.data.token
+    const token = loginBody.data.data.token
 
-    const hashResult: Result<void, Error> = yield call(
+    const [_, tokenSaveErr] = yield call(
       lazyProtect(SecureStore.setItemAsync(SECURE_STORE_HASH_KEY, token))
     )
-    if (hashResult.err) {
+    if (tokenSaveErr) {
       yield put(
         actions.loginResponse({
-          error: hashResult.err.message,
+          error: tokenSaveErr.message,
         })
       )
       continue
@@ -177,7 +177,7 @@ export function* handleRegister() {
     const action = yield take(actions.registerRequest)
     const { name, mail, password } = action.payload
 
-    const { ok, err }: Result<AxiosResponse, AxiosError> = yield call(
+    const [registerBody, registerErr] = yield call(
       lazyProtect(
         axios.post(
           `${API_URL}/register`,
@@ -187,21 +187,23 @@ export function* handleRegister() {
       )
     )
 
-    if (err) {
+    if (registerErr) {
       console.log(`Unable to call ${API_URL}/register`)
-      yield put(actions.registerResponse({ error: getErrorMessage(err) }))
+      yield put(
+        actions.registerResponse({ error: getErrorMessage(registerErr) })
+      )
       continue
     }
 
-    const token = ok.data.data.token
+    const token = registerBody.data.data.token
 
-    const hashResult: Result<void, Error> = yield call(
+    const [_, tokenSaveErr] = yield call(
       lazyProtect(SecureStore.setItemAsync(SECURE_STORE_HASH_KEY, token))
     )
-    if (hashResult.err) {
+    if (tokenSaveErr) {
       yield put(
         actions.registerResponse({
-          error: hashResult.err.message,
+          error: tokenSaveErr.message,
         })
       )
       continue
