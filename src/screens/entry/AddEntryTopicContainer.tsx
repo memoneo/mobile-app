@@ -33,7 +33,7 @@ interface State {
   hideValue: boolean
 }
 
-class AddEntryTopicContainer extends React.Component<Props, State> {
+class AddEntryTopicContainer extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props)
 

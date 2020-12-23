@@ -101,7 +101,7 @@ class Entries extends React.Component<Props, State> {
               buttonStyle={styles.entryInfoButton}
               onPress={() =>
                 this.props.navigation.navigate("AddEntry", {
-                  date: focusedTopicLog?.date ?? focusedDay,
+                  date: focusedDay,
                 })
               }
               title={focusedTopicLog ? "Edit" : "Create"}

@@ -3,11 +3,14 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
-  Button,
+  Keyboard,
   Alert,
   FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  EmitterSubscription,
+  KeyboardAvoidingView,
+  YellowBox,
 } from "react-native"
 import {
   Topic,
@@ -26,6 +29,7 @@ import {
   ScrollView,
 } from "react-navigation"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view"
 
 import { UserActions } from "../../redux/user"
 import { RootState } from "../../redux"
@@ -47,6 +51,8 @@ import { Picker } from "@react-native-community/picker"
 import AddEntryInner from "./AddEntryInner"
 
 import { RecordContext } from "./RecordBar"
+
+YellowBox.ignoreWarnings(["Deprecation in 'navigationOptions'"])
 
 interface OwnProps {}
 
@@ -91,9 +97,25 @@ interface State {
   showOptions: boolean
   recording: string
   playing: string
+  keyboardShown: boolean
+  keyboardHeight: number
 }
 
 class AddEntry extends React.PureComponent<Props, State> {
+  static navigationOptions = ({ navigation }) => {
+    let header = undefined
+    if (
+      navigation.state.params &&
+      navigation.state.params.headerShown === false
+    ) {
+      header = null
+    }
+
+    return {
+      header,
+    }
+  }
+
   state = {
     permissionsLoaded: false,
     hasPermissions: true,
@@ -104,12 +126,36 @@ class AddEntry extends React.PureComponent<Props, State> {
     recording: "",
     playing: "",
     showOptions: true,
+    keyboardShown: false,
+    keyboardHeight: 0,
   }
 
   sound?: Audio.Sound = null
   recordingData?: Audio.Recording = null
 
+  keyboardDidShowListener?: EmitterSubscription = null
+  keyboardDidHideListener?: EmitterSubscription = null
+
   async componentDidMount() {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      event => {
+        this.props.navigation.setParams({ headerShown: false })
+
+        this.setState({
+          keyboardShown: true,
+          keyboardHeight: event.endCoordinates.height,
+        })
+      }
+    )
+    this.keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        this.setState({ keyboardShown: false })
+        this.props.navigation.setParams({ headerShown: true })
+      }
+    )
+
     this.props.topicActions.getTopicsRequest()
     this.props.personActions.getPersonsRequest()
     this.props.goalActions.getGoalsRequest()
@@ -158,6 +204,13 @@ class AddEntry extends React.PureComponent<Props, State> {
           topicLog: this.props.topicLog,
         })
       }
+
+      const oldDateParam: Dayjs | undefined = prevProps.navigation.getParam("date")
+      const dateParam: Dayjs | undefined = this.props.navigation.getParam("date")
+      if (oldDateParam.diff(dateParam, "date") !== 0) {
+        this.setDate({}, dateParam.toDate())
+        return
+      }
     }
   }
 
@@ -170,15 +223,24 @@ class AddEntry extends React.PureComponent<Props, State> {
 
   componentWillUnmount() {
     this.stopRecording()
+    if (this.keyboardDidShowListener) {
+      this.keyboardDidShowListener.remove()
+    }
+
+    if (this.keyboardDidHideListener) {
+      this.keyboardDidHideListener.remove()
+    }
   }
 
   setDate = (_, date: AddEntryDate) => {
     date = date || this.state.date
 
+    console.log(`setting date to ${date}`)
+
     this.setState(
       {
         showDatePicker: false,
-        date: date,
+        date,
       },
       () => {
         this.props.topicActions.getOrCreateTopicLogRequest({
@@ -345,6 +407,9 @@ class AddEntry extends React.PureComponent<Props, State> {
       showDatePicker,
       recording,
       playing,
+      showOptions,
+      keyboardShown,
+      keyboardHeight,
     } = this.state
 
     const hasTopicLog = topicLog !== undefined
@@ -363,8 +428,8 @@ class AddEntry extends React.PureComponent<Props, State> {
               stopRecording: this.stopRecording,
               stopPlayRecording: this.stopPlayRecording,
             }}>
-            <View>
-              {this.state.showOptions && (
+            <KeyboardAvoidingView style={{ flex: 1 }}>
+              {showOptions && !keyboardShown && (
                 <View style={styles.optionsContainer}>
                   <View style={{ flex: 1 }}>
                     <MPicker
@@ -403,7 +468,7 @@ class AddEntry extends React.PureComponent<Props, State> {
                   )}
                 </View>
               )}
-              {dateType === "daily" && (
+              {!keyboardShown && dateType === "daily" && (
                 <View>
                   <MText h3 bold>
                     {dayjs(date).format("D MMMM YYYY")}
@@ -426,26 +491,34 @@ class AddEntry extends React.PureComponent<Props, State> {
                 </View>
               )}
               {hasPermissions && hasTopicLog && (
-                <FlatList
+                <KeyboardAwareFlatList
                   data={topics}
                   onScroll={this.handleScroll}
-                  style={styles.entryList}
-                  renderItem={t => (
-                    <AddEntryInner
-                      topic={t.item}
-                      topicActions={topicActions}
-                      goals={goals}
-                      persons={persons}
-                      topicRecordMap={topicRecordMap}
-                      topicLogValueMap={topicLogValueMap}
-                      date={date}
-                      dateType={dateType}
-                      topicLog={topicLog}
-                    />
+                  removeClippedSubviews={false}
+                  style={StyleSheet.flatten([
+                    styles.entryList,
+                    {
+                      paddingBottom: keyboardShown ? keyboardHeight : 100,
+                    },
+                  ])}
+                  renderItem={({ item, index }) => (
+                    <React.Fragment>
+                      <AddEntryInner
+                        topic={item}
+                        topicActions={topicActions}
+                        goals={goals}
+                        persons={persons}
+                        topicRecordMap={topicRecordMap}
+                        topicLogValueMap={topicLogValueMap}
+                        date={date}
+                        dateType={dateType}
+                        topicLog={topicLog}
+                      />
+                    </React.Fragment>
                   )}
                 />
               )}
-            </View>
+            </KeyboardAvoidingView>
           </RecordContext.Provider>
         </SafeAreaView>
       </Auth>
@@ -549,6 +622,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   entryList: {
-    marginBottom: 40,
+    flex: 1,
   },
 })
