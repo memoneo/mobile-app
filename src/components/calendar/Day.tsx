@@ -34,15 +34,21 @@ export default class Day extends React.Component<Props> {
     }
 
     if (topicLog) {
-      innerStyles.push(styles.dayInnerActive)
-
       if (isSameMonth) {
+        innerStyles.push(styles.dayInnerActive)
+
         textStyles.push(styles.dayTextActive)
+      } else {
+        innerStyles.push(styles.dayInnerActiveNoTopicLog)
       }
     }
 
     if (!isSameMonth) {
-      textStyles.push(styles.dayTextInactive)
+      if (!topicLog) {
+        textStyles.push(styles.dayTextInactive)
+      } else {
+        textStyles.push(styles.dayTextInactiveNoTopicLog)
+      }
     }
 
     return (
@@ -73,6 +79,11 @@ const styles = StyleSheet.create({
     backgroundColor: thirdColor,
     color: "white",
   },
+  dayInnerActiveNoTopicLog: {
+    borderColor: thirdColor,
+    borderWidth: 1,
+    marginVertical: 3,
+  },
   dayInnerFocused: {
     backgroundColor: "white",
     shadowColor: "#000",
@@ -88,6 +99,9 @@ const styles = StyleSheet.create({
     color: "white",
   },
   dayTextInactive: {
+    color: thirdColor,
+  },
+  dayTextInactiveNoTopicLog: {
     color: thirdColor,
   },
   dayText: {

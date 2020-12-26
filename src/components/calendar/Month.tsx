@@ -1,14 +1,8 @@
 import { Dayjs } from "dayjs"
-import { TopicLogWithDatesAsDayJs } from "memoneo-common/lib/types"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import { Icon } from "react-native-elements"
-import {
-  primaryColor,
-  secondaryColor,
-  textStandardColor,
-  thirdColor,
-} from "../../lib/colors"
+import { secondaryColor, textStandardColor, thirdColor } from "../../lib/colors"
 import {
   getMonthDays,
   getDayNames,
@@ -16,7 +10,7 @@ import {
   getMonthNames,
 } from "../../lib/month"
 import MText from "../common/MText"
-import { CalendarTopicLogMap } from "./Calendar"
+import { CalendarTopicLogMap } from "../../screens/entry/Entries"
 import Day from "./Day"
 import Weekdays from "./Weekdays"
 
@@ -28,6 +22,7 @@ interface Props {
   firstDayMonday?: boolean
   focusedDay: Dayjs
   focusDay: (day: Dayjs) => void
+  setMonth: (month: number) => void
 }
 
 interface State {}
@@ -40,6 +35,7 @@ export default class Month extends React.Component<Props, State> {
       topicLogMap,
       focusedDay,
       focusDay,
+      setMonth,
     } = this.props
 
     const days = getMonthDays(month.month(), month.year(), false, [], false)
@@ -60,6 +56,7 @@ export default class Month extends React.Component<Props, State> {
             type="feather"
             color={thirdColor}
             style={styles.monthNameIcon}
+            onPress={() => setMonth(month.month() - 1)}
           />
           <View style={styles.monthName}>
             <MText bold style={styles.monthNameText}>
@@ -71,13 +68,14 @@ export default class Month extends React.Component<Props, State> {
             type="feather"
             color={thirdColor}
             style={styles.monthNameIcon}
+            onPress={() => setMonth(month.month() + 1)}
           />
         </View>
         {showWeekdays && <Weekdays days={dayNames} />}
         <View style={styles.weeksContainer}>
           {weeks.map((week, idx) => (
             <View key={`week-${idx}`} style={styles.weeks}>
-              {week.map((day) => {
+              {week.map(day => {
                 return (
                   <Day
                     key={`day-${day.id}`}

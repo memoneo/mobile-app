@@ -29,6 +29,7 @@ interface DispatchProps {
 
 interface State {
   focusedDay: Dayjs
+  month: Dayjs
 }
 
 export interface CalendarTopicLogMap {
@@ -38,6 +39,7 @@ export interface CalendarTopicLogMap {
 class Entries extends React.Component<Props, State> {
   state = {
     focusedDay: dayjs(new Date()),
+    month: dayjs(),
   }
 
   componentDidMount() {
@@ -50,12 +52,14 @@ class Entries extends React.Component<Props, State> {
     this.setState({ focusedDay: day })
   }
 
+  setMonth = (number: number) => {
+    this.setState({ month: this.state.month.month(number) })
+  }
+
   render(): JSX.Element {
-    const { focusedDay } = this.state
+    const { focusedDay, month } = this.state
 
     const { topicLogs } = this.props
-
-    const month = dayjs()
 
     const topicLogMap: CalendarTopicLogMap = {}
     const adjustedTopicLogs = topicLogs.filter(topicLog => {
@@ -90,6 +94,7 @@ class Entries extends React.Component<Props, State> {
           focusDay={this.focusDay}
           month={month}
           topicLogMap={topicLogMap}
+          setMonth={this.setMonth}
         />
         <Line style={{ width: "95%", marginTop: 24 }} />
         <View style={styles.entryInfoContainer}>
