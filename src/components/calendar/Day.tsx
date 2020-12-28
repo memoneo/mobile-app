@@ -4,9 +4,6 @@ import MText from "../common/MText"
 import { DayType } from "../../lib/month"
 import { StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 import {
-  borderRadius,
-  primaryColor,
-  secondaryColor,
   thirdColor,
 } from "../../lib/colors"
 import { TopicLogWithDatesAsDayJs } from "memoneo-common/lib/types"

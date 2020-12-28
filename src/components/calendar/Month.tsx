@@ -38,7 +38,13 @@ export default class Month extends React.Component<Props, State> {
       setMonth,
     } = this.props
 
-    const days = getMonthDays(month.month(), month.year(), false, [], false)
+    const days = getMonthDays(
+      month.month(),
+      month.year(),
+      firstDayMonday,
+      [],
+      false
+    )
     const dayNames = getDayNames(firstDayMonday)
 
     const weeks: DayType[][] = []
