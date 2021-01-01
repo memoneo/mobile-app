@@ -242,6 +242,8 @@ function* handleSaveRecording(action: any) {
     dayjs(date).format("D-MMMM-YYYY")
   )}/${topic.id}.m4a`
 
+  console.log("Saving file to " + newAudioFilePath)
+
   const [_, moveError] = yield call(
     lazyProtect(
       FileSystem.moveAsync({

@@ -28,6 +28,7 @@ import SettingsSelectionTypeItemAdd from "../screens/settings/SettingsSelectionT
 import SettingsPersonAdd from "../screens/settings/SettingsPersonAdd"
 import Entries from "../screens/entry/Entries"
 import AddTopic from "../screens/settings/topic/AddTopic"
+import NoNetwork from "../screens/NoNetwork"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -233,6 +234,9 @@ const rootSwitchNavigator = createSwitchNavigator(
     },
     NotEncrypted: {
       screen: EnterEncryptionKey,
+    },
+    NoNetwork: {
+      screen: NoNetwork,
     },
   },
   {

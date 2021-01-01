@@ -5,6 +5,7 @@ import { AuthActions } from "../redux/auth"
 import { RootState } from "../redux"
 import { withNavigation, NavigationInjectedProps } from "react-navigation"
 import EncryptionContainer from "./EncryptionContainer"
+import NetInfo from "@react-native-community/netinfo"
 
 interface OwnProps {}
 
@@ -21,11 +22,17 @@ type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
 class Auth extends React.Component<Props, {}> {
   componentDidMount() {
-    const { authenticated, loading, authActions } = this.props
+    const { authenticated, loading, authActions, navigation } = this.props
 
     if (!authenticated && !loading) {
       authActions.autoLoginRequest()
     }
+
+    NetInfo.addEventListener(connectionInfo => {
+      if (!connectionInfo.isConnected || !connectionInfo.isInternetReachable) {
+        navigation.navigate("NoNetwork")
+      } 
+    })
   }
 
   componentDidUpdate() {
@@ -42,9 +49,11 @@ class Auth extends React.Component<Props, {}> {
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const authenticated = state.auth.authenticated
   const loading = state.auth.loading
 
@@ -54,9 +63,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     authActions: bindActionCreators(AuthActions, dispatch),
   }
