@@ -9,7 +9,6 @@ import {
 import { TopicActions, TopicLogValueMap } from "../../redux/topic"
 import { TopicRecordMap } from "../../redux/recording"
 import AddEntryTopicContainer from "./AddEntryTopicContainer"
-import { AddEntryDate } from "../../types/AddEntry"
 import { Dayjs } from "dayjs"
 
 interface Props {
@@ -18,7 +17,7 @@ interface Props {
   topicActions: typeof TopicActions
   persons: Person[]
   goals: Goal[]
-  date: AddEntryDate
+  date: Dayjs
   topicRecordMap: TopicRecordMap
   topicLogValueMap: TopicLogValueMap
   dateType: TopicLogDateType

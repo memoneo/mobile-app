@@ -21,12 +21,13 @@ import {
 } from "memoneo-common/lib/utils/axios"
 import { getHash, getTextEncryptionKey } from "../../lib/redux"
 import { AddEntryDate } from "../../types/AddEntry"
-import { formatAddEntryDate } from "../../lib/format"
+import { formatAddEntryDate, formatDayJs } from "../../lib/format"
 import { dayjs } from "../../lib/reexports"
 import { decryptTopicLogValues } from "./lib"
 import { isTextTopic } from "../../lib/topic"
 import { encryptText } from "../../lib/encryption"
 import { textStandardColor } from "../../lib/colors"
+import { Dayjs } from "dayjs"
 
 export interface TopicState {
   loading: boolean
@@ -423,12 +424,12 @@ function* handleGetTopicLogs(action: any) {
 export function* handleGetOrCreateTopicLog() {
   while (true) {
     const action = yield take(actions.getOrCreateTopicLogRequest)
-    const date: AddEntryDate = action.payload.date
+    const date: Dayjs = action.payload.date
     const dateType: TopicLogDateType = action.payload.dateType
 
     const hash: string = yield call(getHash)
 
-    const dateString = formatAddEntryDate(date)
+    const dateString = formatDayJs(date)
 
     const [getOrCreateBody, getOrCreateError] = yield call(
       lazyProtect(

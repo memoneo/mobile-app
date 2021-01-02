@@ -16,6 +16,7 @@ import { contentDiffColor, borderRadius } from "../../lib/colors"
 import AddEntryTopicValue from "./values/AddEntryTopicValue"
 import { TopicActions } from "../../redux/topic"
 import RecordBar from "./RecordBar"
+import { Dayjs } from "dayjs"
 
 interface Props {
   topic: Topic
@@ -24,7 +25,7 @@ interface Props {
   value?: TopicLogValue
   persons: Person[]
   goals: Goal[]
-  date: AddEntryDate
+  date: Dayjs
   dateType: TopicLogDateType
 }
 

@@ -112,10 +112,9 @@ export function* handleGetRecordings() {
     if (!dateType)
       throw Error(`dateType may not be null/empty in handleSaveRecording`)
 
-    const recordingDirectory = getRecordingDirectory(
-      dateType,
-      dayjs(date).format("D-MMMM-YYYY")
-    )
+    const dateString = dayjs(date).format("D-MMMM-YYYY")
+
+    const recordingDirectory = getRecordingDirectory(dateType, dateString)
 
     const [fileExists, existsErr] = yield call(
       lazyProtect(exists(recordingDirectory))
@@ -131,6 +130,7 @@ export function* handleGetRecordings() {
     }
 
     if (!fileExists) {
+      console.log(`No recordings exist for ${dateString}`)
       yield put(
         actions.getRecordingsResponse({
           error: "",

@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs"
 import {
   User,
   TopicLogDateType,
@@ -18,6 +19,10 @@ export function formatAddEntryDate(addEntryDate: AddEntryDate): string {
   }
 
   throw new Error(`AddEntryDate ${addEntryDate} is not supported`)
+}
+
+export function formatDayJs(dayjs: Dayjs): string {
+  return dayjs.format("DD-MM-YYYY")
 }
 
 export function formatTopicName(

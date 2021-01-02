@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs"
 import { Topic, TopicLogDateType } from "memoneo-common/lib/types"
 import React from "react"
 import { StyleSheet, View } from "react-native"
@@ -13,11 +14,7 @@ interface RecordContextData {
 
   canRecord: () => boolean
   startRecording: (topic: Topic) => void
-  playRecording: (
-    topic: Topic,
-    date: AddEntryDate,
-    dateType: TopicLogDateType
-  ) => void
+  playRecording: (topic: Topic, date: Dayjs, dateType: TopicLogDateType) => void
   stopPlayRecording: () => void
   stopRecording: (body: { topic: Topic }) => void
 }
@@ -26,7 +23,7 @@ export const RecordContext = React.createContext<RecordContextData>(null)
 
 interface Props {
   topic: Topic
-  date: AddEntryDate
+  date: Dayjs
   dateType: TopicLogDateType
 }
 

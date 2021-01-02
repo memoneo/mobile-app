@@ -92,7 +92,7 @@ interface State {
   hasPermissions: boolean
   permissionsLoaded: boolean
   dateType: TopicLogDateType
-  date: AddEntryDate
+  date: Dayjs
   showDatePicker: boolean
   showOptions: boolean
   recording: string
@@ -116,18 +116,22 @@ class AddEntry extends React.PureComponent<Props, State> {
     }
   }
 
-  state = {
-    permissionsLoaded: false,
-    hasPermissions: true,
-    // I shouldn't need to cast here!
-    dateType: "daily" as TopicLogDateType,
-    date: new Date(),
-    showDatePicker: false,
-    recording: "",
-    playing: "",
-    showOptions: true,
-    keyboardShown: false,
-    keyboardHeight: 0,
+  constructor(props: Props) {
+    super(props)
+
+    this.state = {
+      permissionsLoaded: false,
+      hasPermissions: true,
+      // I shouldn't need to cast here!
+      dateType: "daily" as TopicLogDateType,
+      date: this.props.navigation.getParam("date") || dayjs(),
+      showDatePicker: false,
+      recording: "",
+      playing: "",
+      showOptions: true,
+      keyboardShown: false,
+      keyboardHeight: 0,
+    }
   }
 
   sound?: Audio.Sound = null
@@ -170,13 +174,14 @@ class AddEntry extends React.PureComponent<Props, State> {
       this.setState({ hasPermissions: false })
     }
 
-    this.updateRecordings()
+    // outdated
+    // const dateParam: Dayjs | undefined = this.props.navigation.getParam("date")
+    // if (dateParam) {
+    //   this.setDate({}, dateParam.toDate())
+    //   return
+    // }
 
-    const dateParam: Dayjs | undefined = this.props.navigation.getParam("date")
-    if (dateParam) {
-      this.setDate({}, dateParam.toDate())
-      return
-    }
+    this.updateRecordings()
 
     this.props.topicActions.getOrCreateTopicLogRequest({
       date: this.getCurrentDate(),
@@ -205,8 +210,12 @@ class AddEntry extends React.PureComponent<Props, State> {
         })
       }
 
-      const oldDateParam: Dayjs | undefined = prevProps.navigation.getParam("date")
-      const dateParam: Dayjs | undefined = this.props.navigation.getParam("date")
+      const oldDateParam: Dayjs | undefined = prevProps.navigation.getParam(
+        "date"
+      )
+      const dateParam: Dayjs | undefined = this.props.navigation.getParam(
+        "date"
+      )
       if (oldDateParam.diff(dateParam, "date") !== 0) {
         this.setDate({}, dateParam.toDate())
         return
@@ -232,21 +241,28 @@ class AddEntry extends React.PureComponent<Props, State> {
     }
   }
 
-  setDate = (_, date: AddEntryDate) => {
-    date = date || this.state.date
+  setDate = (_, date: Date) => {
+    const dayJsDate = dayjs(date) || this.state.date
+
+    if (dayJsDate === this.state.date) {
+      console.log("date is same, no state update is needed")
+      return
+    }
 
     console.log(`setting date to ${date}`)
 
     this.setState(
       {
         showDatePicker: false,
-        date,
+        date: dayJsDate,
       },
       () => {
         this.props.topicActions.getOrCreateTopicLogRequest({
           date,
           dateType: this.state.dateType,
         })
+
+        this.updateRecordings()
       }
     )
   }
@@ -254,7 +270,7 @@ class AddEntry extends React.PureComponent<Props, State> {
   /**
    * Can be deleted later.
    */
-  getCurrentDate = (): AddEntryDate => this.state.date
+  getCurrentDate = (): Dayjs => this.state.date
 
   canRecord = (): boolean =>
     !this.props.loadingRecording &&
@@ -304,14 +320,14 @@ class AddEntry extends React.PureComponent<Props, State> {
    */
   playRecording = async (
     topic: Topic,
-    date: AddEntryDate,
+    date: Dayjs,
     dateType: TopicLogDateType
   ) => {
     this.sound = new Audio.Sound()
 
     const path = getRecordingDirectory(
       dateType,
-      dayjs(date).format("D-MMMM-YYYY")
+      date.format("D-MMMM-YYYY")
     )
     await this.sound.loadAsync({ uri: path + `/${topic.id}.m4a` })
     this.sound.setOnPlaybackStatusUpdate(status => {
@@ -457,7 +473,7 @@ class AddEntry extends React.PureComponent<Props, State> {
                         />
                         {showDatePicker && (
                           <DateTimePicker
-                            value={date}
+                            value={date.toDate()}
                             mode="date"
                             display="default"
                             onChange={this.setDate}
