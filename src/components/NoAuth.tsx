@@ -25,14 +25,14 @@ class NoAuth extends React.Component<Props, {}> {
     if (!authenticated && !loading) {
       authActions.autoLoginRequest()
     } else if (authenticated) {
-      navigation.navigate("Home")
+      navigation.navigate("Tab")
     }
   }
 
   componentDidUpdate() {
     const { authenticated, loading, navigation } = this.props
 
-    if (authenticated && !loading) navigation.navigate("Home")
+    if (authenticated && !loading) navigation.navigate("Tab")
   }
 
   render(): JSX.Element {

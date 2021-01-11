@@ -13,6 +13,14 @@ export async function getHash(): Promise<string> {
   return hash ?? ""
 }
 
+export async function resetHash(): Promise<Error | undefined> {
+  const [_, err] = await protect<void, Error>(
+    SecureStore.setItemAsync(SECURE_STORE_HASH_KEY, "")
+  )
+
+  return err
+}
+
 export async function getTextEncryptionKey(): Promise<[string, Error]> {
   return await protect<string, Error>(
     SecureStore.getItemAsync(SECURE_STORE_ENCRYPTION_KEY)

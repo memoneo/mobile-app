@@ -201,6 +201,9 @@ class AddEntry extends React.PureComponent<Props, State> {
         this.updateRecordings()
       }
 
+      // console.log("prevProps.topicLog.id " + prevProps.topicLog?.id ?? "NONE")
+      // console.log("this.props.topicLog.id " + this.props.topicLog?.id ?? "NONE")
+
       if (
         (!prevProps.topicLog && this.props.topicLog) ||
         (prevProps.topicLog && prevProps.topicLog.id !== this.props.topicLog.id)
@@ -216,9 +219,12 @@ class AddEntry extends React.PureComponent<Props, State> {
       const dateParam: Dayjs | undefined = this.props.navigation.getParam(
         "date"
       )
-      if (oldDateParam.diff(dateParam, "date") !== 0) {
-        this.setDate({}, dateParam.toDate())
-        return
+      if (oldDateParam && dateParam) {
+        if (oldDateParam.diff(dateParam, "date") !== 0) {
+          console.log("dateParams are different, setDate")
+          this.setDate({}, dateParam.toDate())
+          return
+        }
       }
     }
   }
@@ -241,7 +247,12 @@ class AddEntry extends React.PureComponent<Props, State> {
     }
   }
 
-  setDate = (_, date: Date) => {
+  setDate = (_, date?: Date) => {
+    if (!date) {
+      console.warn("setDate on undefined date?")
+      return
+    }
+
     const dayJsDate = dayjs(date) || this.state.date
 
     if (dayJsDate === this.state.date) {
@@ -258,7 +269,7 @@ class AddEntry extends React.PureComponent<Props, State> {
       },
       () => {
         this.props.topicActions.getOrCreateTopicLogRequest({
-          date,
+          date: dayJsDate,
           dateType: this.state.dateType,
         })
 
@@ -325,10 +336,7 @@ class AddEntry extends React.PureComponent<Props, State> {
   ) => {
     this.sound = new Audio.Sound()
 
-    const path = getRecordingDirectory(
-      dateType,
-      date.format("D-MMMM-YYYY")
-    )
+    const path = getRecordingDirectory(dateType, date.format("D-MMMM-YYYY"))
     await this.sound.loadAsync({ uri: path + `/${topic.id}.m4a` })
     this.sound.setOnPlaybackStatusUpdate(status => {
       if (status.isLoaded) {

@@ -431,6 +431,7 @@ export function* handleGetOrCreateTopicLog() {
 
     const dateString = formatDayJs(date)
 
+    //console.log("TEST!")
     const [getOrCreateBody, getOrCreateError] = yield call(
       lazyProtect(
         axios.get(`${API_URL}/topiclog/getorcreate/${dateType}/${dateString}`, {
@@ -439,6 +440,7 @@ export function* handleGetOrCreateTopicLog() {
         })
       )
     )
+    //console.log("TEST2")
 
     if (getOrCreateError) {
       yield put(

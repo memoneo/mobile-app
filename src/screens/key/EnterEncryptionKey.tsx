@@ -28,11 +28,17 @@ type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
 interface State {
   encryptionKey: string
+  performedUpdate: boolean
 }
 
 class EnterEncryptionKey extends React.PureComponent<Props, State> {
-  state = {
-    encryptionKey: "",
+  constructor(props: Props) {
+    super(props)
+
+    this.state = {
+      encryptionKey: props.textEncryptionKey || "",
+      performedUpdate: false,
+    }
   }
 
   componentDidMount() {
@@ -46,7 +52,8 @@ class EnterEncryptionKey extends React.PureComponent<Props, State> {
   checkRenavigate = () => {
     const { textEncryptionKey, navigation, error, authenticated } = this.props
 
-    if (!!textEncryptionKey) {
+    // not clean, no check if the key is actually updated.
+    if (!!textEncryptionKey && this.state.performedUpdate) {
       navigation.navigate("Tab")
     } else if (error) {
       navigation.navigate("Error")
@@ -56,8 +63,12 @@ class EnterEncryptionKey extends React.PureComponent<Props, State> {
   }
 
   addKey = () =>
-    this.props.encryptionActions.initKeyRequest({
-      textEncryptionKey: this.state.encryptionKey,
+    this.setState({ performedUpdate: true }, () => {
+      if (this.state.encryptionKey !== this.props.textEncryptionKey) {
+        this.props.encryptionActions.initKeyRequest({
+          textEncryptionKey: this.state.encryptionKey,
+        })
+      }
     })
 
   render(): JSX.Element {
@@ -82,11 +93,11 @@ class EnterEncryptionKey extends React.PureComponent<Props, State> {
         <View style={styles.encryptionKeyInput}>
           <MInput
             value={this.state.encryptionKey}
-            onChangeText={(v) => this.setState({ encryptionKey: v })}
+            onChangeText={v => this.setState({ encryptionKey: v })}
           />
         </View>
         <View style={styles.createButton}>
-          <MButton title="Add" onPress={this.addKey} />
+          <MButton title="Update" onPress={this.addKey} />
         </View>
         <View style={styles.warningContainer}>
           <MText>
@@ -100,9 +111,11 @@ class EnterEncryptionKey extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const textEncryptionKey = state.key.textEncryptionKey
   const error = state.key.error
   const authenticated = state.auth.authenticated
@@ -114,9 +127,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     encryptionActions: bindActionCreators(EncryptionActions, dispatch),
   }

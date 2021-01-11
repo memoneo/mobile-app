@@ -9,7 +9,7 @@ import {
   getErrorMessage,
   authorizedHeader,
 } from "memoneo-common/lib/utils/axios"
-import { getHash } from "../../lib/redux"
+import { getHash, resetHash } from "../../lib/redux"
 
 export interface AuthState {
   authenticated: boolean
@@ -102,6 +102,7 @@ export const authReducer = handleActions<AuthState, Partial<AuthState>>(
       return {
         loading: false,
         authenticated: false,
+        error: "",
       }
     },
   },
@@ -217,8 +218,10 @@ export function* handleLogout() {
   while (true) {
     yield take(actions.logout)
 
-    yield call(
-      lazyProtect(SecureStore.setItemAsync(SECURE_STORE_HASH_KEY, null))
-    )
+    const err = yield call(resetHash)
+
+    if (err) {
+      console.warn(`Unable to resetHash to logout ${err}`)
+    }
   }
 }

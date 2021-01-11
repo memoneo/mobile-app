@@ -29,6 +29,7 @@ import { Icon } from "react-native-elements"
 import DraggableFlatList from "react-native-draggable-flatlist"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import { Picker } from "@react-native-community/picker"
+import dayjs from "dayjs"
 
 interface OwnProps {}
 
@@ -78,7 +79,7 @@ class EditTopics extends React.PureComponent<Props, State> {
   componentDidUpdate(prevProps: Props) {}
 
   setDate = (_, date: AddEntryDate) => {
-    date = date || this.state.date
+    const dayJsDate = dayjs(date) || this.state.date
 
     this.setState(
       {
@@ -87,7 +88,7 @@ class EditTopics extends React.PureComponent<Props, State> {
       },
       () => {
         this.props.topicActions.getOrCreateTopicLogRequest({
-          date,
+          date: dayJsDate,
           dateType: this.state.dateType,
         })
       }

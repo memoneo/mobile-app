@@ -1,5 +1,11 @@
 import React from "react"
-import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native"
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native"
 import {
   NavigationInjectedProps,
   NavigationScreenProp,
@@ -45,7 +51,28 @@ class Settings extends React.PureComponent<Props, State> {
     this.props.navigation.navigate(screen)
   }
 
+  alertChangeEncryptionKey = () => {
+    Alert.alert(
+      "Warning",
+      "This will change your text encryption key and can corrupt your data. Only confirm if you know what you are doing.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancelled recording"),
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => this.props.navigation.navigate("NotEncrypted"),
+        },
+      ],
+      { cancelable: false }
+    )
+  }
+
   render(): JSX.Element {
+    const { authActions } = this.props
+
     return (
       <Auth>
         <SafeAreaView style={styles.container}>
@@ -53,8 +80,7 @@ class Settings extends React.PureComponent<Props, State> {
           <Section>
             <TouchableOpacity
               onPress={() => this.navigateTo("Topic")}
-              style={styles.settingsRow}
-            >
+              style={styles.settingsRow}>
               <Icon
                 name="folder"
                 type="feather"
@@ -64,8 +90,7 @@ class Settings extends React.PureComponent<Props, State> {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => this.navigateTo("Goal")}
-              style={styles.settingsRow}
-            >
+              style={styles.settingsRow}>
               <Icon
                 name="wind"
                 type="feather"
@@ -75,8 +100,7 @@ class Settings extends React.PureComponent<Props, State> {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => this.navigateTo("Person")}
-              style={styles.settingsRow}
-            >
+              style={styles.settingsRow}>
               <Icon
                 name="user"
                 type="feather"
@@ -86,8 +110,7 @@ class Settings extends React.PureComponent<Props, State> {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => this.navigateTo("SelectionType")}
-              style={styles.settingsRow}
-            >
+              style={styles.settingsRow}>
               <Icon
                 name="merge-type"
                 type="MaterialIcons"
@@ -96,15 +119,50 @@ class Settings extends React.PureComponent<Props, State> {
               <MText>Selection Types</MText>
             </TouchableOpacity>
           </Section>
+          <SectionTitle title="Account" />
+          <Section>
+            <TouchableOpacity
+              onPress={() => {}}
+              style={styles.settingsRow}>
+              <Icon
+                name="eye"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Personal data</MText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => this.alertChangeEncryptionKey()}
+              style={styles.settingsRow}>
+              <Icon
+                name="unlock"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Encryption key</MText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => authActions.logout()}
+              style={styles.settingsRow}>
+              <Icon
+                name="log-out"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Log out</MText>
+            </TouchableOpacity>
+          </Section>
           <SectionTitle title="Help" />
           <Section>
             <View style={styles.helpMailText}>
               <MText>
                 <MText>
-                  If you have any suggestions, need explanations, want to insult
-                  me etc., you can contact me via mail at{" "}
+                  If you have any suggestions, need explanations, etc., you can
+                  contact me via mail at{" "}
                 </MText>
-                <MText focus onPress={() => openInbox()}>{HELP_MAIL_ADDRESS}</MText>
+                <MText focus onPress={() => openInbox()}>
+                  {HELP_MAIL_ADDRESS}
+                </MText>
                 <MText>.</MText>
               </MText>
             </View>
@@ -115,18 +173,21 @@ class Settings extends React.PureComponent<Props, State> {
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-  state
-) => {
+const mapStateToProps: MapStateToProps<
+  StateProps,
+  OwnProps,
+  RootState
+> = state => {
   const authenticated = state.auth.authenticated
   return {
     authenticated,
   }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-  dispatch
-) => {
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps,
+  OwnProps
+> = dispatch => {
   return {
     authActions: bindActionCreators(AuthActions, dispatch),
   }
@@ -152,6 +213,5 @@ const styles = StyleSheet.create({
     marginRight: 18,
     color: textStandardColor,
   },
-  helpMailText: {
-  },
+  helpMailText: {},
 })
