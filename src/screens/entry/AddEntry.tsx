@@ -51,6 +51,7 @@ import { Picker } from "@react-native-community/picker"
 import AddEntryInner from "./AddEntryInner"
 
 import { RecordContext } from "./RecordBar"
+import LoadingIndicator from "../../components/LoadingIndicator"
 
 YellowBox.ignoreWarnings(["Deprecation in 'navigationOptions'"])
 
@@ -195,7 +196,7 @@ class AddEntry extends React.PureComponent<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     if (prevProps) {
       if (prevProps.idOfLastSavedTopic !== this.props.idOfLastSavedTopic) {
         this.updateRecordings()
@@ -219,6 +220,13 @@ class AddEntry extends React.PureComponent<Props, State> {
       const dateParam: Dayjs | undefined = this.props.navigation.getParam(
         "date"
       )
+
+      // if (prevState.date.diff(dateParam, "date") !== 0) {
+      //   console.log("prevState.date.diff")
+      //   this.setDate({}, dateParam.toDate())
+      //   return
+      // }
+
       if (oldDateParam && dateParam) {
         if (oldDateParam.diff(dateParam, "date") !== 0) {
           console.log("dateParams are different, setDate")
@@ -249,7 +257,7 @@ class AddEntry extends React.PureComponent<Props, State> {
 
   setDate = (_, date?: Date) => {
     if (!date) {
-      console.warn("setDate on undefined date?")
+      // console.warn("setDate on undefined date?")
       return
     }
 
@@ -423,6 +431,8 @@ class AddEntry extends React.PureComponent<Props, State> {
       topicActions,
       topicLogValueMap,
       persons,
+      loading,
+      loadingTopic,
     } = this.props
     const {
       hasPermissions,
@@ -441,6 +451,7 @@ class AddEntry extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.main}>
+        <LoadingIndicator loading={loading} />
           <RecordContext.Provider
             value={{
               recording,
@@ -514,7 +525,8 @@ class AddEntry extends React.PureComponent<Props, State> {
                   <MError text={topicError} />
                 </View>
               )}
-              {hasPermissions && hasTopicLog && (
+              {/*loadingTopic && <MText>Loading...</MText>*/}
+              {!loadingTopic && hasPermissions && hasTopicLog && (
                 <KeyboardAwareFlatList
                   data={topics}
                   onScroll={this.handleScroll}
