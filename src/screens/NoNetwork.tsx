@@ -1,11 +1,11 @@
-import * as React from "react"
+import React, { useEffect } from "react"
 import { withNavigation, NavigationInjectedProps } from "react-navigation"
 import NetInfo from "@react-native-community/netinfo"
 import MError from "../components/common/MError"
 import { APP_NAME } from "../../config"
 import { StyleSheet, View } from "react-native"
 import { Icon } from "react-native-elements"
-import MText from "../components/common/MText"
+import useInterval from "@use-it/interval"
 
 interface OwnProps {}
 
@@ -22,6 +22,10 @@ function NoNetwork(props: Props): JSX.Element {
       props.navigation.navigate("Tab")
     }
   }
+
+  useInterval(() => {
+    refresh()
+  }, 2000)
 
   return (
     <View style={styles.container}>

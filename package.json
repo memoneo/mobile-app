@@ -16,6 +16,7 @@
     "@react-native-community/slider": "^3.0.3",
     "@tradle/react-native-http": "^2.0.1",
     "@types/yup": "^0.29.10",
+    "@use-it/interval": "^1.0.0",
     "await-protect": "^1.0.13",
     "axios": "^0.19.2",
     "dayjs": "^1.8.29",
