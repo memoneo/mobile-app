@@ -1,6 +1,5 @@
 import React from "react"
 import { SafeAreaView, StyleSheet, View } from "react-native"
-import { Button, Text } from "react-native-elements"
 import {
   NavigationInjectedProps,
   NavigationScreenProp,
@@ -8,7 +7,6 @@ import {
 } from "react-navigation"
 import { connect, MapStateToProps, MapDispatchToProps } from "react-redux"
 import { Formik } from "formik"
-import { AuthActions } from "../redux/auth"
 import { bindActionCreators } from "redux"
 import { RootState } from "../redux"
 import MInput from "../components/common/MInput"
@@ -18,34 +16,32 @@ import { Yup } from "../lib/reexports"
 import MError from "../components/common/MError"
 import NoAuth from "../components/NoAuth"
 import Header from "../components/Header"
+import { PasswordRecoveryActions } from "../redux/recovery"
 
 interface OwnProps {}
 
 interface StateProps {
-  authenticated: boolean
   loading: boolean
   error: string
 }
 
 interface DispatchProps {
-  authActions: typeof AuthActions
+  passwordRecoveryActions: typeof PasswordRecoveryActions
 }
 
 interface FormProps {
   mail: string
-  password: string
 }
 
 type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
 interface State {}
 
-const LoginSchema = Yup.object().shape({
+const Schema = Yup.object().shape({
   mail: Yup.string().email("Invalid mail").required("Required"),
-  password: Yup.string().required("Required"),
 })
 
-class Login extends React.PureComponent<Props, State> {
+class RequestPasswordRecovery extends React.PureComponent<Props, State> {
   static navigationOptions = (_: NavigationScreenProp<any>) => {
     return {
       headerTitle: "Login",
@@ -53,10 +49,17 @@ class Login extends React.PureComponent<Props, State> {
   }
 
   handleSubmit = (values: FormProps) => {
-    this.props.authActions.loginRequest({
+    this.props.passwordRecoveryActions.requestCodeRequest({
       mail: values.mail,
-      password: values.password,
     })
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.loading && !this.props.loading) {
+      if (!this.props.error) {
+        this.props.navigation.navigate("VerifyRecoveryCode")
+      }
+    }
   }
 
   render(): JSX.Element {
@@ -68,9 +71,9 @@ class Login extends React.PureComponent<Props, State> {
           <View style={styles.innerContainer}>
             <Header style={styles.logoContainer} />
             <Formik<FormProps>
-              initialValues={{ mail: "", password: "" }}
+              initialValues={{ mail: "" }}
               onSubmit={this.handleSubmit}
-              validationSchema={LoginSchema}>
+              validationSchema={Schema}>
               {({
                 handleChange,
                 handleBlur,
@@ -91,39 +94,20 @@ class Login extends React.PureComponent<Props, State> {
                     onChangeText={handleChange("mail")}
                   />
                   {errors.mail && touched.mail && <MError text={errors.mail} />}
-                  <MText h4 bold style={{ marginTop: 12 }}>
-                    Password
-                  </MText>
-                  <MInput
-                    placeholder="Enter your password..."
-                    value={values.password}
-                    textContentType="password"
-                    autoCompleteType="password"
-                    secureTextEntry={true}
-                    onBlur={handleBlur("password")}
-                    onChangeText={handleChange("password")}
-                  />
-                  {errors.password && touched.password && (
-                    <MError text={errors.password} />
-                  )}
                   <View style={styles.errorInfo}>
                     {error.length > 0 && <MError text={error} />}
                   </View>
                   <View style={styles.buttonContainer}>
                     <MButton
-                      title="Log in"
+                      title="Request code"
                       loading={loading}
                       onPress={handleSubmit as any}
                     />
                     <MButton
                       buttonStyle={styles.buttonForgottenPassword}
-                      title="Forgotten password?"
+                      title="Back to Login"
                       type="outline"
-                      onPress={() =>
-                        this.props.navigation.navigate(
-                          "RequestPasswordRecovery"
-                        )
-                      }
+                      onPress={() => this.props.navigation.navigate("Login")}
                     />
                   </View>
                 </View>
@@ -141,12 +125,10 @@ const mapStateToProps: MapStateToProps<
   OwnProps,
   RootState
 > = state => {
-  const authenticated = state.auth.authenticated
-  const loading = state.auth.loading
-  const error = state.auth.error
+  const loading = state.recovery.loading
+  const error = state.recovery.error
 
   return {
-    authenticated,
     loading,
     error,
   }
@@ -157,14 +139,17 @@ const mapDispatchToProps: MapDispatchToProps<
   OwnProps
 > = dispatch => {
   return {
-    authActions: bindActionCreators(AuthActions, dispatch),
+    passwordRecoveryActions: bindActionCreators(
+      PasswordRecoveryActions,
+      dispatch
+    ),
   }
 }
 
 export default connect<StateProps, DispatchProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
-)(withNavigation(Login))
+)(withNavigation(RequestPasswordRecovery))
 
 const styles = StyleSheet.create({
   container: {

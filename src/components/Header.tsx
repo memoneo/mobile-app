@@ -1,11 +1,15 @@
 import React from "react"
-import { View, StyleSheet } from "react-native"
+import { View, StyleSheet, ViewStyle } from "react-native"
 //import DrawerMenu from "./DrawerMenu"
 import Logo from "./common/Logo"
 import MText from "./common/MText"
 
-const Header: React.FC = (props) => (
-  <View style={styles.headerContainer}>
+interface Props {
+  style: ViewStyle
+}
+
+const Header: React.FC<Props> = props => (
+  <View style={StyleSheet.flatten([styles.headerContainer, props.style || {}])}>
     {/* <DrawerMenu style={{ position: "absolute" }} /> */}
     <View style={styles.innerHeaderContainer}>
       <Logo style={styles.logo} width={24} height={24} />

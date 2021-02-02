@@ -29,6 +29,7 @@ import SettingsPersonAdd from "../screens/settings/SettingsPersonAdd"
 import Entries from "../screens/entry/Entries"
 import AddTopic from "../screens/settings/topic/AddTopic"
 import NoNetwork from "../screens/NoNetwork"
+import RequestPasswordRecovery from "../screens/RequestPasswordRecovery"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -234,6 +235,9 @@ const rootSwitchNavigator = createSwitchNavigator(
     },
     NotEncrypted: {
       screen: EnterEncryptionKey,
+    },
+    RequestPasswordRecovery: {
+      screen: RequestPasswordRecovery,
     },
     NoNetwork: {
       screen: NoNetwork,

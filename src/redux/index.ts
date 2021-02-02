@@ -60,6 +60,7 @@ import {
   handleInitKey,
   handleRetrieveKey,
 } from "./encryption"
+import { handleRequestCode, handleVerifyCode, passwordRecoveryReducer, PasswordRecoveryState } from "./recovery"
 
 export interface RootState {
   topic: TopicState
@@ -70,6 +71,7 @@ export interface RootState {
   person: PersonState
   goal: GoalState
   key: EncryptionState
+  recovery: PasswordRecoveryState
 }
 
 export const rootReducer = combineReducers<RootState>({
@@ -81,6 +83,7 @@ export const rootReducer = combineReducers<RootState>({
   person: personReducer,
   goal: goalReducer,
   key: encryptionReducer,
+  recovery: passwordRecoveryReducer,
 })
 
 export function* rootSaga() {
@@ -91,6 +94,9 @@ export function* rootSaga() {
   yield fork(handleLogin)
   yield fork(handleRegister)
   yield fork(handleLogout)
+
+  yield fork(handleVerifyCode)
+  yield fork(handleRequestCode)
 
   yield fork(handleGetRecordings)
   yield fork(watchHandleSaveRecording)
