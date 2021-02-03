@@ -60,7 +60,7 @@ import {
   handleInitKey,
   handleRetrieveKey,
 } from "./encryption"
-import { handleRequestCode, handleVerifyCode, passwordRecoveryReducer, PasswordRecoveryState } from "./recovery"
+import { handleRequestCode, handleUpdatePassword, handleVerifyCode, passwordRecoveryReducer, PasswordRecoveryState } from "./recovery"
 
 export interface RootState {
   topic: TopicState
@@ -97,6 +97,7 @@ export function* rootSaga() {
 
   yield fork(handleVerifyCode)
   yield fork(handleRequestCode)
+  yield fork(handleUpdatePassword)
 
   yield fork(handleGetRecordings)
   yield fork(watchHandleSaveRecording)

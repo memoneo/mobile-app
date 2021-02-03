@@ -30,6 +30,8 @@ import Entries from "../screens/entry/Entries"
 import AddTopic from "../screens/settings/topic/AddTopic"
 import NoNetwork from "../screens/NoNetwork"
 import RequestPasswordRecovery from "../screens/RequestPasswordRecovery"
+import VerifyRecoveryCode from "../screens/VerifyRecoveryCode"
+import ChangePassword from "../screens/ChangePassword"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -79,6 +81,7 @@ const HomeStack = createStackNavigator(
     initialRouteName: "Home",
   }
 )
+
 const SettingsStack = createStackNavigator(
   {
     Main: { screen: Settings, navigationOptions: { headerShown: true } },
@@ -224,6 +227,22 @@ const tabNavigator = createBottomTabNavigator(
   }
 )
 
+const RecoveryStack = createStackNavigator(
+  {
+    RequestPasswordRecovery: {
+      screen: RequestPasswordRecovery,
+      navigationOptions: { headerShown: false },
+    },
+    VerifyRecoveryCode: {
+      screen: VerifyRecoveryCode,
+    },
+  },
+  {
+    ...defaultStackConfig,
+    initialRouteName: "RequestPasswordRecovery",
+  }
+)
+
 const rootSwitchNavigator = createSwitchNavigator(
   {
     NoAuth: {
@@ -233,11 +252,14 @@ const rootSwitchNavigator = createSwitchNavigator(
     Error: {
       screen: ErrorPage,
     },
+    RequestPasswordRecovery: {
+      screen: RecoveryStack,
+    },
     NotEncrypted: {
       screen: EnterEncryptionKey,
     },
-    RequestPasswordRecovery: {
-      screen: RequestPasswordRecovery,
+    ChangePassword: {
+      screen: ChangePassword,
     },
     NoNetwork: {
       screen: NoNetwork,

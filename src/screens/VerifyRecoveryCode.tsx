@@ -30,17 +30,17 @@ interface DispatchProps {
 }
 
 interface FormProps {
-  mail: string
+  code: string
 }
 
 type Props = OwnProps & StateProps & DispatchProps & NavigationInjectedProps
 
 interface State {
-  mail: string
+  code: string
 }
 
 const Schema = Yup.object().shape({
-  mail: Yup.string().email("Invalid mail").required("Required"),
+  code: Yup.string().required("Required"),
 })
 
 class RequestPasswordRecovery extends React.PureComponent<Props, State> {
@@ -50,23 +50,23 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
     }
   }
 
-  state = {
-    mail: "",
-  }
-
   handleSubmit = (values: FormProps) => {
-    this.setState({ mail: values.mail }, () =>
-      this.props.passwordRecoveryActions.requestCodeRequest({
-        mail: values.mail,
+    this.setState({ code: values.code }, () =>
+      this.props.passwordRecoveryActions.verifyCodeRequest({
+        code: values.code,
+        mail: this.getMail(),
       })
     )
   }
 
+  getMail = (): string => this.props.navigation.getParam("mail")
+
   componentDidUpdate(prevProps: Props) {
     if (prevProps.loading && !this.props.loading) {
-      if (!this.props.error && this.state.mail) {
-        this.props.navigation.navigate("VerifyRecoveryCode", {
-          mail: this.state.mail,
+      if (!this.props.error && this.state.code) {
+        this.props.navigation.navigate("ChangePassword", {
+          mail: this.getMail(),
+          code: this.state.code,
         })
       }
     }
@@ -81,7 +81,7 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
           <View style={styles.innerContainer}>
             <Header style={styles.logoContainer} />
             <Formik<FormProps>
-              initialValues={{ mail: "" }}
+              initialValues={{ code: "" }}
               onSubmit={this.handleSubmit}
               validationSchema={Schema}>
               {({
@@ -94,30 +94,33 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
               }) => (
                 <View style={styles.formContainer}>
                   <MText h4 bold>
-                    Mail
+                    Code
                   </MText>
                   <MInput
-                    placeholder="Enter your mail..."
-                    value={values.mail}
-                    textContentType="emailAddress"
-                    onBlur={handleBlur("mail")}
-                    onChangeText={handleChange("mail")}
+                    placeholder="Code..."
+                    value={values.code}
+                    onBlur={handleBlur("code")}
+                    onChangeText={handleChange("code")}
                   />
-                  {errors.mail && touched.mail && <MError text={errors.mail} />}
+                  {errors.code && touched.code && <MError text={errors.code} />}
                   <View style={styles.errorInfo}>
                     {error.length > 0 && <MError text={error} />}
                   </View>
                   <View style={styles.buttonContainer}>
                     <MButton
-                      title="Request code"
+                      title="Verify"
                       loading={loading}
                       onPress={handleSubmit as any}
                     />
                     <MButton
                       buttonStyle={styles.buttonForgottenPassword}
-                      title="Back to Login"
+                      title="Resend code"
                       type="outline"
-                      onPress={() => this.props.navigation.navigate("Login")}
+                      onPress={() =>
+                        this.props.navigation.navigate(
+                          "RequestPasswordRecovery"
+                        )
+                      }
                     />
                   </View>
                 </View>

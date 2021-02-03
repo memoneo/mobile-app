@@ -15,9 +15,17 @@ export const actionNames = {
   VERIFY_CODE_REQUEST: "VERIFY_CODE_REQUEST",
   REQUEST_CODE_RESPONSE: "REQUEST_CODE_RESPONSE",
   REQUEST_CODE_REQUEST: "REQUEST_CODE_REQUEST",
+  UPDATE_PASSWORD_RESPONSE: "UPDATE_PASSWORD_RESPONSE",
+  UPDATE_PASSWORD_REQUEST: "UPDATE_PASSWORD_REQUEST",
 }
 
 export const actions = {
+  updatePasswordResponse: createAction<Partial<PasswordRecoveryState>>(
+    actionNames.UPDATE_PASSWORD_RESPONSE
+  ),
+  updatePasswordRequest: createAction<Partial<PasswordRecoveryState>>(
+    actionNames.UPDATE_PASSWORD_REQUEST
+  ),
   verifyCodeResponse: createAction<Partial<PasswordRecoveryState>>(
     actionNames.VERIFY_CODE_RESPONSE
   ),
@@ -45,6 +53,20 @@ export const passwordRecoveryReducer = handleActions<
   Partial<PasswordRecoveryState>
 >(
   {
+    [actionNames.UPDATE_PASSWORD_REQUEST]: (state, action) => {
+      return {
+        ...state,
+        error: "",
+        loading: true,
+      }
+    },
+    [actionNames.UPDATE_PASSWORD_RESPONSE]: (state, action) => {
+      return {
+        ...state,
+        error: action.payload.error,
+        loading: false,
+      }
+    },
     [actionNames.VERIFY_CODE_REQUEST]: (state, action) => {
       return {
         ...state,
@@ -107,16 +129,19 @@ export function* handleRequestCode() {
 export function* handleVerifyCode() {
   while (true) {
     const action = yield take(actions.verifyCodeRequest)
-    const { code } = action.payload
+    const { code, mail } = action.payload
     if (!code) {
       throw new Error("code must be provided in action.payload")
+    }
+    if (!mail) {
+      throw new Error("mail must be provided in action.payload")
     }
 
     const [_, err] = yield call(
       lazyProtect(
         axios.post(
           `${API_URL}/user/recovery/verify`,
-          { code },
+          { code, mail },
           { withCredentials: true }
         )
       )
@@ -128,5 +153,38 @@ export function* handleVerifyCode() {
     }
 
     yield put(actions.verifyCodeResponse({ error: "" }))
+  }
+}
+
+export function* handleUpdatePassword() {
+  while (true) {
+    const action = yield take(actions.updatePasswordRequest)
+    const { code, mail, password } = action.payload
+    if (!code) {
+      throw new Error("code must be provided in action.payload")
+    }
+    if (!mail) {
+      throw new Error("mail must be provided in action.payload")
+    }
+    if (!password) {
+      throw new Error("password must be provided in action.payload")
+    }
+
+    const [_, err] = yield call(
+      lazyProtect(
+        axios.post(
+          `${API_URL}/user/password/change`,
+          { code, mail, newPassword: password },
+          { withCredentials: true }
+        )
+      )
+    )
+
+    if (err) {
+      yield put(actions.updatePasswordResponse({ error: getErrorMessage(err) }))
+      continue
+    }
+
+    yield put(actions.updatePasswordResponse({ error: "" }))
   }
 }
