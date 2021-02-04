@@ -6,7 +6,7 @@ import {
   withNavigation,
 } from "react-navigation"
 import { connect, MapStateToProps, MapDispatchToProps } from "react-redux"
-import { Formik } from "formik"
+import { Formik, FormikErrors } from "formik"
 import { bindActionCreators } from "redux"
 import { RootState } from "../redux"
 import MInput from "../components/common/MInput"
@@ -18,6 +18,7 @@ import NoAuth from "../components/NoAuth"
 import Header from "../components/Header"
 import { PasswordRecoveryActions } from "../redux/recovery"
 import { AuthActions } from "../redux/auth"
+import Auth from "../components/Auth"
 
 interface OwnProps {}
 
@@ -25,6 +26,7 @@ interface StateProps {
   authenticated: boolean
   loading: boolean
   error: string
+  mail?: string
 }
 
 interface DispatchProps {
@@ -48,10 +50,10 @@ const Schema = Yup.object().shape({
   confirmNewPassword: Yup.string().required("Required"),
 })
 
-class RequestPasswordRecovery extends React.PureComponent<Props, State> {
+class ChangePassword extends React.PureComponent<Props, State> {
   static navigationOptions = (_: NavigationScreenProp<any>) => {
     return {
-      headerTitle: "Login",
+      headerTitle: "Change Password",
     }
   }
 
@@ -62,11 +64,13 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
     this.props.passwordRecoveryActions.updatePasswordRequest({
       mail,
       code,
+      oldPassword: values.oldPassword,
       password: values.newPassword,
     })
   }
 
-  getMail = (): string => this.props.navigation.getParam("mail")
+  getMail = (): string =>
+    this.props.mail || this.props.navigation.getParam("mail")
   getCode = (): string => this.props.navigation.getParam("code")
 
   componentDidUpdate(prevProps: Props) {
@@ -74,9 +78,9 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
       if (!this.props.error) {
         if (this.props.authenticated) {
           this.props.authActions.logout()
-        } else {
-          this.props.navigation.navigate("Login")
         }
+
+        this.props.navigation.navigate("Login")
       }
     }
   }
@@ -92,102 +96,143 @@ class RequestPasswordRecovery extends React.PureComponent<Props, State> {
   }
 
   render(): JSX.Element {
-    const { loading, error } = this.props
+    const { authenticated } = this.props
 
-    return (
+    return authenticated ? (
+      <Auth>
+        <Inner
+          {...this.props}
+          handleSubmit={this.handleSubmit}
+          validate={this.validate}
+        />
+      </Auth>
+    ) : (
       <NoAuth>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.innerContainer}>
-            <Header style={styles.logoContainer} />
-            <Formik<FormProps>
-              initialValues={{
-                oldPassword: "",
-                newPassword: "",
-                confirmNewPassword: "",
-              }}
-              validate={this.validate}
-              onSubmit={this.handleSubmit}
-              validationSchema={Schema}>
-              {({
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                values,
-                errors,
-                touched,
-              }) => (
-                <View style={styles.formContainer}>
-                  {false && (
-                    <React.Fragment>
-                      <MText h4 bold>
-                        Old Password
-                      </MText>
-                      <MInput
-                        placeholder="Old password..."
-                        value={values.oldPassword}
-                        textContentType="password"
-                        onBlur={handleBlur("oldPassword")}
-                        onChangeText={handleChange("oldPassword")}
-                      />
-                      {errors.oldPassword && touched.oldPassword && (
-                        <MError text={errors.oldPassword} />
-                      )}
-                    </React.Fragment>
-                  )}
-                  <MText h4 bold>
-                    New Password
-                  </MText>
-                  <MInput
-                    placeholder="New password..."
-                    value={values.newPassword}
-                    textContentType="password"
-                    secureTextEntry
-                    onBlur={handleBlur("newPassword")}
-                    onChangeText={handleChange("newPassword")}
-                  />
-                  {errors.newPassword && touched.newPassword && (
-                    <MError text={errors.newPassword} />
-                  )}
-                  <MText h4 bold>
-                    Confirm Password
-                  </MText>
-                  <MInput
-                    placeholder="Confirm..."
-                    value={values.confirmNewPassword}
-                    secureTextEntry
-                    textContentType="password"
-                    onBlur={handleBlur("confirmNewPassword")}
-                    onChangeText={handleChange("confirmNewPassword")}
-                  />
-                  {errors.confirmNewPassword && touched.confirmNewPassword && (
-                    <MError text={errors.confirmNewPassword} />
-                  )}
-                  <View style={styles.errorInfo}>
-                    {error.length > 0 && <MError text={error} />}
-                  </View>
-                  <View style={styles.buttonContainer}>
-                    <MButton
-                      title="Change password"
-                      loading={loading}
-                      onPress={handleSubmit as any}
-                    />
-                    {true && (
-                      <MButton
-                        buttonStyle={styles.buttonForgottenPassword}
-                        title="Back to Login"
-                        type="outline"
-                        onPress={() => this.props.navigation.navigate("Login")}
-                      />
-                    )}
-                  </View>
-                </View>
-              )}
-            </Formik>
-          </View>
-        </SafeAreaView>
+        <Inner
+          {...this.props}
+          handleSubmit={this.handleSubmit}
+          validate={this.validate}
+        />
       </NoAuth>
     )
   }
+}
+
+interface InnerProps extends Props {
+  validate: (values: FormProps) => FormikErrors<FormProps>
+  handleSubmit: (values: FormProps) => void
+}
+
+function Inner(props: InnerProps) {
+  const {
+    loading,
+    error,
+    validate,
+    handleSubmit,
+    navigation,
+    authenticated,
+  } = props
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.innerContainer}>
+        <Header style={styles.logoContainer} />
+        <Formik<FormProps>
+          initialValues={{
+            oldPassword: "",
+            newPassword: "",
+            confirmNewPassword: "",
+          }}
+          validate={validate}
+          onSubmit={handleSubmit}
+          validationSchema={Schema}>
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <View style={styles.formContainer}>
+              {authenticated && (
+                <React.Fragment>
+                  <MText h4 bold>
+                    Old Password
+                  </MText>
+                  <MInput
+                    placeholder="Old password..."
+                    value={values.oldPassword}
+                    textContentType="password"
+                    secureTextEntry
+                    onBlur={handleBlur("oldPassword")}
+                    onChangeText={handleChange("oldPassword")}
+                  />
+                  {errors.oldPassword && touched.oldPassword && (
+                    <MError text={errors.oldPassword} />
+                  )}
+                </React.Fragment>
+              )}
+              <MText h4 bold>
+                New Password
+              </MText>
+              <MInput
+                placeholder="New password..."
+                value={values.newPassword}
+                textContentType="password"
+                secureTextEntry
+                onBlur={handleBlur("newPassword")}
+                onChangeText={handleChange("newPassword")}
+              />
+              {errors.newPassword && touched.newPassword && (
+                <MError text={errors.newPassword} />
+              )}
+              <MText h4 bold>
+                Confirm Password
+              </MText>
+              <MInput
+                placeholder="Confirm..."
+                value={values.confirmNewPassword}
+                secureTextEntry
+                textContentType="password"
+                onBlur={handleBlur("confirmNewPassword")}
+                onChangeText={handleChange("confirmNewPassword")}
+              />
+              {errors.confirmNewPassword && touched.confirmNewPassword && (
+                <MError text={errors.confirmNewPassword} />
+              )}
+              <View style={styles.errorInfo}>
+                {error.length > 0 && <MError text={error} />}
+              </View>
+              <View style={styles.buttonContainer}>
+                <MButton
+                  title="Change password"
+                  loading={loading}
+                  onPress={handleSubmit as any}
+                />
+                {authenticated && (
+                  <MButton
+                    buttonStyle={styles.buttonForgottenPassword}
+                    title="Back to Settings"
+                    type="outline"
+                    onPress={() => navigation.navigate("PersonalData")}
+                  />
+                )}
+                {!authenticated && (
+                  <MButton
+                    buttonStyle={styles.buttonForgottenPassword}
+                    title="Back to Login"
+                    type="outline"
+                    onPress={() => navigation.navigate("Login")}
+                  />
+                )}
+              </View>
+            </View>
+          )}
+        </Formik>
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const mapStateToProps: MapStateToProps<
@@ -198,11 +243,13 @@ const mapStateToProps: MapStateToProps<
   const loading = state.recovery.loading
   const error = state.recovery.error
   const authenticated = state.auth.authenticated
+  const mail = state.user.ownUser?.mail ?? ""
 
   return {
     loading,
     error,
     authenticated,
+    mail,
   }
 }
 
@@ -222,7 +269,7 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect<StateProps, DispatchProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
-)(withNavigation(RequestPasswordRecovery))
+)(withNavigation(ChangePassword))
 
 const styles = StyleSheet.create({
   container: {

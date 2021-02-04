@@ -32,6 +32,7 @@ import NoNetwork from "../screens/NoNetwork"
 import RequestPasswordRecovery from "../screens/RequestPasswordRecovery"
 import VerifyRecoveryCode from "../screens/VerifyRecoveryCode"
 import ChangePassword from "../screens/ChangePassword"
+import SettingsPersonalData from "../screens/settings/SettingsPersonalData"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -101,6 +102,12 @@ const SettingsStack = createStackNavigator(
       navigationOptions: {
         headerShown: true,
         headerTitle: "Edit Selection Type",
+      },
+    },
+    PersonalData: {
+      screen: SettingsPersonalData,
+      navigationOptions: {
+        headerShown: true,
       },
     },
     Person: {

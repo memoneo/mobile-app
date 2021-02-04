@@ -122,7 +122,7 @@ class Settings extends React.PureComponent<Props, State> {
           <SectionTitle title="Account" />
           <Section>
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={() => this.props.navigation.navigate("PersonalData")}
               style={styles.settingsRow}>
               <Icon
                 name="eye"

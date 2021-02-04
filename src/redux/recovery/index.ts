@@ -3,7 +3,8 @@ import { take, call, put } from "redux-saga/effects"
 import { lazyProtect } from "await-protect"
 import { API_URL } from "../../../config"
 import { axios } from "memoneo-common/lib/reexports"
-import { getErrorMessage, defaultHeaders } from "memoneo-common/lib/utils/axios"
+import { getErrorMessage, defaultHeaders, authorizedHeader } from "memoneo-common/lib/utils/axios"
+import { getHash } from "../../lib/redux"
 
 export interface PasswordRecoveryState {
   loading: boolean
@@ -159,9 +160,9 @@ export function* handleVerifyCode() {
 export function* handleUpdatePassword() {
   while (true) {
     const action = yield take(actions.updatePasswordRequest)
-    const { code, mail, password } = action.payload
-    if (!code) {
-      throw new Error("code must be provided in action.payload")
+    const { code, mail, oldPassword, password } = action.payload
+    if (!code && !oldPassword) {
+      throw new Error("code or oldPassword must be provided in action.payload")
     }
     if (!mail) {
       throw new Error("mail must be provided in action.payload")
@@ -170,12 +171,16 @@ export function* handleUpdatePassword() {
       throw new Error("password must be provided in action.payload")
     }
 
+    const hash: string = yield call(getHash)
+
+    const headers = hash ? { ...authorizedHeader(hash) } : {}
+
     const [_, err] = yield call(
       lazyProtect(
         axios.post(
           `${API_URL}/user/password/change`,
-          { code, mail, newPassword: password },
-          { withCredentials: true }
+          { code, mail, oldPassword, newPassword: password },
+          { withCredentials: true, headers }
         )
       )
     )
