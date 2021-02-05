@@ -33,6 +33,7 @@ import RequestPasswordRecovery from "../screens/RequestPasswordRecovery"
 import VerifyRecoveryCode from "../screens/VerifyRecoveryCode"
 import ChangePassword from "../screens/ChangePassword"
 import SettingsPersonalData from "../screens/settings/SettingsPersonalData"
+import SettingsChangeMail from "../screens/settings/SettingsChangeMail"
 
 const defaultStackConfig = {
   defaultNavigationOptions: {
@@ -106,6 +107,12 @@ const SettingsStack = createStackNavigator(
     },
     PersonalData: {
       screen: SettingsPersonalData,
+      navigationOptions: {
+        headerShown: true,
+      },
+    },
+    ChangeMail: {
+      screen: SettingsChangeMail,
       navigationOptions: {
         headerShown: true,
       },

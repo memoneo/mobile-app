@@ -22,11 +22,15 @@ export interface UserState {
 const actionNames = {
   GET_USER_REQUEST: "GET_USER_REQUEST",
   GET_USER_RESPONSE: "GET_USER_RESPONSE",
+  CHANGE_MAIL_REQUEST: "CHANGE_MAIL_REQUEST",
+  CHANGE_MAIL_RESPONSE: "CHANGE_MAIL_RESPONSE",
 }
 
 const actions = {
   getUserRequest: createAction<any>(actionNames.GET_USER_REQUEST),
   getUserResponse: createAction<any>(actionNames.GET_USER_RESPONSE),
+  changeMailRequest: createAction<any>(actionNames.CHANGE_MAIL_REQUEST),
+  changeMailResponse: createAction<any>(actionNames.CHANGE_MAIL_RESPONSE),
 }
 
 export const UserActions = actions
@@ -50,6 +54,32 @@ export const userReducer = handleActions<UserState, any>(
       return {
         ...state,
         ...action.payload,
+        loading: false,
+      }
+    },
+    [actionNames.CHANGE_MAIL_REQUEST]: (state, action) => {
+      return {
+        ...state,
+        loading: true,
+      }
+    },
+    [actionNames.CHANGE_MAIL_RESPONSE]: (state, action) => {
+      const { mail, error } = action.payload
+      if (!mail) {
+        throw new Error(
+          "mail must be inside CHANGE_MAIL_RESPONSE action payload"
+        )
+      }
+
+      const newUser = { ...state.ownUser }
+      if (!error) {
+        newUser.mail = mail
+      }
+
+      return {
+        ...state,
+        ownUser: newUser,
+        error,
         loading: false,
       }
     },
@@ -88,6 +118,52 @@ function* handleGetUser() {
     actions.getUserResponse({
       error: "",
       ownUser: user,
+    })
+  )
+}
+
+export function* watchHandleChangeMail() {
+  yield takeEvery(actions.changeMailRequest, handleChangeMail)
+}
+
+function* handleChangeMail(action: any) {
+  const { password, newMail } = action.payload
+  if (!newMail) {
+    throw new Error("newMail must be provided in handleChangeMail")
+  }
+
+  if (!password) {
+    throw new Error("password must be provided in handleChangeMail")
+  }
+
+  const hash: string = yield call(getHash)
+
+  const [_, err] = yield call(
+    lazyProtect(
+      axios.post(
+        `${API_URL}/user/mail/change`,
+        { mail: newMail, password },
+        {
+          withCredentials: true,
+          headers: { ...defaultHeaders, ...authorizedHeader(hash) },
+        }
+      )
+    )
+  )
+
+  if (err) {
+    yield put(
+      actions.changeMailResponse({
+        error: getErrorMessage(err),
+      })
+    )
+    return
+  }
+
+  yield put(
+    actions.changeMailResponse({
+      error: "",
+      mail: newMail,
     })
   )
 }

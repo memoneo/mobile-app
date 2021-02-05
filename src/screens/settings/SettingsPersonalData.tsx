@@ -22,7 +22,6 @@ import Auth from "../../components/Auth"
 import MText from "../../components/common/MText"
 import { Icon } from "react-native-elements"
 import { textStandardColor } from "../../lib/colors"
-import { HELP_MAIL_ADDRESS } from "../../../config"
 
 interface OwnProps {}
 
@@ -57,6 +56,16 @@ class SettingsPersonalData extends React.PureComponent<Props, State> {
         <SafeAreaView style={styles.container}>
           <SectionTitle title="Account" />
           <Section>
+          <TouchableOpacity
+              onPress={() => this.navigateTo("ChangeMail")}
+              style={styles.settingsRow}>
+              <Icon
+                name="unlock"
+                type="feather"
+                iconStyle={styles.settingsIcon}
+              />
+              <MText>Mail address</MText>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => this.navigateTo("ChangePassword")}
               style={styles.settingsRow}>
