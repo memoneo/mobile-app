@@ -42,7 +42,6 @@ import recordingOptions from "../../lib/recordingOptions"
 import MError from "../../components/common/MError"
 import { getRecordingDirectory } from "../../lib/dir"
 import { AddEntryDate } from "../../types/AddEntry"
-import AddEntryTopicContainer from "./AddEntryTopicContainer"
 import { TopicActions, TopicLogValueMap } from "../../redux/topic"
 import { PersonActions } from "../../redux/person"
 import { Dayjs } from "dayjs"
@@ -188,12 +187,6 @@ class AddEntry extends React.PureComponent<Props, State> {
       date: this.getCurrentDate(),
       dateType: this.state.dateType,
     })
-
-    if (this.props.topicLog) {
-      this.props.topicActions.getTopicLogValuesRequest({
-        topicLog: this.props.topicLog,
-      })
-    }
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
@@ -451,7 +444,7 @@ class AddEntry extends React.PureComponent<Props, State> {
     return (
       <Auth>
         <SafeAreaView style={styles.main}>
-        <LoadingIndicator loading={loading} />
+          <LoadingIndicator loading={loading} />
           <RecordContext.Provider
             value={{
               recording,

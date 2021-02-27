@@ -195,7 +195,7 @@ export const topicReducer = handleActions<TopicState, any>(
     [actionNames.CREATE_OR_UPDATE_TOPIC_LOG_VALUE_REQUEST]: (state, action) => {
       return {
         ...state,
-        loading: true,
+        //loading: true,
         loadingSaveValue: true,
         error: "",
       }
@@ -225,7 +225,7 @@ export const topicReducer = handleActions<TopicState, any>(
 
       return {
         ...state,
-        loading: false,
+        //loading: false,
         loadingSaveValue: false,
         topicLogValueMap: newTopicLogValueMap,
       }
